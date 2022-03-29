@@ -29,7 +29,7 @@ summary(pokemon)
 
 # on regarde s'il y a des donnees manquantes
 pokemon %>% summarise_all(~ sum(is.na(.))) %>% View # pour chaque colonne
-# 492 pour colonne type_2 : normal, tous les pokemon n'ont pas 2 types
+# 492 pour colonne type_2 : normal, tous les pokemons n'ont pas 2 types
 # 1 pour colonne weight_kg : pokemon 1033 Eternatus Eternamax
 # 3 pour colonne ability_1 : ok
 # 529 pour colonne ability_2 : ok
@@ -44,10 +44,10 @@ pokemon %>% summarise_all(~ sum(is.na(.))) %>% View # pour chaque colonne
 # 1 pour colonne egg_cycles
 pokemon %>% map_df(~sum(is.na(.))) %>% rowSums() # 2448 au total
 
-# on regarde le nombre de pokemeon "doublons" (numero de pokedex)
+# on regarde le nombre de pokemosn "doublons" (numero de pokedex)
 sum(duplicated(pokemon[,"pokedex_number"])) # 147 doublons
 # on enleve les doublons
-pokemon2 <- pokemon %>% distinct(pokedex_number, .keep_all = TRUE) # eneleve les Mega et garde uniquement les formes de bases des pokemon (pas les evolutions)
+pokemon2 <- pokemon %>% distinct(pokedex_number, .keep_all = TRUE) # on enleve les Mega et garde uniquement les formes de bases des pokemon (pas les evolutions)
 
 ```
 
