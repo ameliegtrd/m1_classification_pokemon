@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Librairies
 ```{r library, eval=TRUE, include=TRUE}
 # definition des librairies dont on a besoin
-load_lib <- c("tidyverse", "kableExtra", "rAmCharts")
+load_lib <- c("tidyverse", "kableExtra", "FactoMineR")
 # packages necessaires qui ne sont pas installes
 install_lib <- load_lib[!load_lib %in% installed.packages()] 
 # installation des packages manquants
@@ -21,10 +21,9 @@ for (lib in install_lib) install.packages(lib,dependencies=TRUE)
 sapply(load_lib,require,character=TRUE)
 ```
 
-## Importation des donnéees et traitements
+## Importation des donnéees et choix des colonnes
 ```{r data, eval=TRUE, include=TRUE}
 pokemon <- read_delim(file="pokedex.csv", delim = ",", col_names = TRUE)
-str(pokemon)
 summary(pokemon)
 
 # on regarde s'il y a des donnees manquantes
@@ -72,15 +71,15 @@ Notes de gael (pro de pokémon) :
 ```{r}
 ## Afficher le nombre de pokemons par generation
 # on cree un tableau avec le nombre de pokemons par generation 
-nb_pokemon_gen <- pokemon2 %>% count(generation)  
+# nb_pokemon_gen <- pokemon2 %>% count(generation)  
 # on affiche la table obtenue
-knitr::kable(nb_pokemon_gen) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+knitr::kable(pokemon2 %>% count(generation) ) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 
 ## Afficher le nombre de pokemons par status
 # on cree un tableau avec le nombre de pokemons par generation 
-nb_pokemon_status <- pokemon2 %>% count(status)  
+# nb_pokemon_status <- pokemon2 %>% count(status)  
 # on affiche la table obtenue
-knitr::kable(nb_pokemon_status) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+knitr::kable(pokemon2 %>% count(status) ) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 
 ## Reprentation des types(1) de pokemons
 # pour chaque type_1, on compte le nombre de fois qu'il apparait dans la bdd
@@ -104,14 +103,68 @@ ggplot(pokemon2) + aes(x = "", y=weight_kg) + geom_boxplot(fill="pink") + ggtitl
 Différentes conclusions en fonction des générations ? Est-ce que la génération 8 a de meilleurs stats que la génération 1 ? plus de hp ?
 
 
-## Analyse des données
+## Classification
+
+Avant de procéder à la classification, il faut transformer les variables qualitatives.
 ```{r}
+pokemon3 = pokemon2
+## pour le status
+# on convertit en facteur
+pokemon3$status <- as_factor(pokemon3$status)
+class(pokemon3$status)
+levels(pokemon3$status) # du moins rare au plus rare
+# on recode : 1 pour Normal, 2 pour Sub Legendary, 3 pour Legendary et 4 pour Mythical
+pokemon3$status <- as.numeric(pokemon3$status)
+
+## pour type_1
+# on convertit en facteur
+pokemon3$type_1 <- as_factor(pokemon3$type_1)
+class(pokemon3$type_1)
+levels(pokemon3$type_1) 
+pokemon3$type_1 <- fct_relevel(pokemon3$type_1, sort)
+levels(pokemon3$type_1) 
+pokemon3$type_1 <-as.numeric(pokemon3$type_1)
+
+## pour type_2
+# on convertit en facteur
+pokemon3$type_2 <- as_factor(pokemon3$type_2)
+class(pokemon3$type_2)
+levels(pokemon3$type_2) 
+pokemon3$type_2 <- fct_relevel(pokemon3$type_2,sort)
+pokemon3$type_2 <- as.numeric(pokemon3$type_2)
+
+## ability ?
 
 ```
+On a changé les valeurs pour les types de sorte que :
+1 = "Bug"   
+2 = "Dark"     
+3 = "Dragon"   
+4 = "Electric" 
+5 = "Fairy"    
+6 = "Fighting" 
+7 = "Fire"     
+8 = "Flying"  
+9 = "Ghost"    
+10 = "Grass"    
+11 = "Ground"   
+12 = "Ice"      
+13 = "Normal"   
+14 = "Poison"   
+15 = "Psychic"  
+16 = "Rock"    
+17 = "Steel"    
+18 = "Water"
 
-
-## Classification
 ```{r}
+## on teste les differents algorithmes vus en cours
+sum(duplicated(pokemon3$name)) # unicite des noms des pokemons
+pokemon3 <- column_to_rownames(pokemon3, var="name")
+# on standardise car les variables n'ont pas toutes la meme unite
+FAMD(pokemon3 %>% select(-c(1)))
+
+## choix de la classification finale (nb de groupes)
+
 
 ```
 On veut regrouper les pokemons. Combien de groupes ? 
