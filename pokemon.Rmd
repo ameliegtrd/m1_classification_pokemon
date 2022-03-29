@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Librairies
 ```{r library, eval=TRUE, include=TRUE}
 # definition des librairies dont on a besoin
-load_lib <- c("tidyverse")
+load_lib <- c("tidyverse", "kableExtra", "rAmCharts")
 # packages necessaires qui ne sont pas installes
 install_lib <- load_lib[!load_lib %in% installed.packages()] 
 # installation des packages manquants
@@ -44,18 +44,15 @@ pokemon %>% summarise_all(~ sum(is.na(.))) %>% View # pour chaque colonne
 # 1 pour colonne egg_cycles
 pokemon %>% map_df(~sum(is.na(.))) %>% rowSums() # 2448 au total
 
-# on regarde le nombre de pokemosn "doublons" (numero de pokedex)
+# on regarde le nombre de pokemon "doublons" (numero de pokedex)
 sum(duplicated(pokemon[,"pokedex_number"])) # 147 doublons
 # on enleve les doublons
 pokemon2 <- pokemon %>% distinct(pokedex_number, .keep_all = TRUE) # on enleve les Mega et garde uniquement les formes de bases des pokemon (pas les evolutions)
 
 # suppression de certaines colonnes
-pokemon2 <-select(pokemon,-c(german_name, japanese_name, species, catch_rate, base_friendship, base_experience, growth_rate, egg_type_number, egg_type_1, egg_type_2, egg_cycles))
+pokemon2 <- pokemon2 %>% select(-c("...1",german_name, japanese_name, species, catch_rate, base_friendship, base_experience, growth_rate, egg_type_number, egg_type_1, egg_type_2, egg_cycles))
 
 ```
-
-Gérer le problème des individus en double : garder qu'une unique forme pour chaque pokémon ou enlever la version "méga" du jeu de données
-
 Notes de gael (pro de pokémon) : 
 - pokémon acier en général bcp de défense
 - pokémon psy ou/et insecte en général pas bcp d'hp et de défense
@@ -73,8 +70,6 @@ Notes de gael (pro de pokémon) :
 
 ## Exploration des données
 ```{r}
-pokemon2 
-
 ## Afficher le nombre de pokemons par generation
 # on cree un tableau avec le nombre de pokemons par generation 
 nb_pokemon_gen <- pokemon2 %>% count(generation)  
@@ -89,22 +84,22 @@ knitr::kable(nb_pokemon_status) %>% kable_styling(bootstrap_options = c("striped
 
 ## Reprentation des types(1) de pokemons
 # pour chaque type_1, on compte le nombre de fois qu'il apparait dans la bdd
-pokemon_type_1 <- pokemon2 %>% count(type_1) %>% arrange(desc(n))
-# representation graphique (avec rAmcharts) des genres dans le top
-amBarplot(x = "type_1", y = "n", data = filter(pokemon_type_1), labelRotation = -45, main="Représentation des types de pokemons",xlab="Type",ylab="Nombre de types")
+# pokemon_type_1 <- pokemon2 %>% count(type_1) %>% arrange(desc(n))
+# representation graphique des genres dans le top
+ggplot(pokemon2) + aes(x=reorder(type_1,type_1, function(x)-length(x)), fill=type_1) + geom_bar() + ggtitle("Représentation des types 1 de pokemons") +  xlab("Type 1") + ylab("Nombre de types") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ## Reprentation des types(2) de pokemons
 # pour chaque type_2, on compte le nombre de fois qu'il apparait dans la bdd
-pokemon_type_2 <- pokemon2 %>% count(type_2) %>% arrange(desc(n))
-# representation graphique (avec rAmcharts) des genres dans le top
-amBarplot(x = "type_2", y = "n", data = filter(pokemon_type_2), labelRotation = -45, main="Représentation des types de pokemons",xlab="Type",ylab="Nombre de types")
+# pokemon_type_2 <- pokemon2 %>% count(type_2) %>% arrange(desc(n))
+# representation graphique des genres dans le top
+ggplot(pokemon2) + aes(x=reorder(type_2,type_2, function(x)-length(x)), fill=type_2) + geom_bar() + ggtitle("Représentation des types 2 de pokemons") +  xlab("Type 2") + ylab("Nombre de types") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 # on peut voir que 492 pokemons n'ont pas second type
 
 ## Boxplot de la taille des pokemons
-amBoxplot(pokemon2$height_m, data=pokemon2, ylim = c(0,12), xlab="", ylab="Taille en mètre", main="Boxplot de la taille des pokemon")
+ggplot(pokemon2) + aes(x = "", y=height_m, color=height_m) + geom_boxplot(fill="pink") + ggtitle("Boxplot de la taille des pokemon") +  xlab("") + ylab("Taille en mètre")
 
 ## Boxplot du poids des pokemons
-amBoxplot(pokemon2$weight_kg, data=pokemon2, ylim = c(0,600), xlab="", ylab="Poids en kg", main="Boxplot du poids des pokemon")
+ggplot(pokemon2) + aes(x = "", y=weight_kg) + geom_boxplot(fill="pink") + ggtitle("Boxplot du poids des pokemon") +  xlab("") + ylab("Poids en kg")
 ```
 Différentes conclusions en fonction des générations ? Est-ce que la génération 8 a de meilleurs stats que la génération 1 ? plus de hp ?
 
