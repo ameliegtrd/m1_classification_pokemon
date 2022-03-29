@@ -21,7 +21,7 @@ for (lib in install_lib) install.packages(lib,dependencies=TRUE)
 sapply(load_lib,require,character=TRUE)
 ```
 
-## Importation des donnéees
+## Importation des donnéees et traitements
 ```{r data, eval=TRUE, include=TRUE}
 pokemon <- read_delim(file="pokedex.csv", delim = ",", col_names = TRUE)
 str(pokemon)
@@ -31,9 +31,9 @@ summary(pokemon)
 pokemon %>% summarise_all(~ sum(is.na(.))) %>% View # pour chaque colonne
 # 492 pour colonne type_2 : normal, tous les pokemon n'ont pas 2 types
 # 1 pour colonne weight_kg : pokemon 1033 Eternatus Eternamax
-# 3 pour colonne ability_1
-# 529 pour colonne ability_2
-# 232 pour colonne ability_hidden
+# 3 pour colonne ability_1 : ok
+# 529 pour colonne ability_2 : ok
+# 232 pour colonne ability_hidden : ok
 # 18 pour colonne catch_rate
 # 115 pour colonne base_friendship
 # 120 pour colonne base_experience
@@ -43,11 +43,13 @@ pokemon %>% summarise_all(~ sum(is.na(.))) %>% View # pour chaque colonne
 # 173 pour colonne percentage_male
 # 1 pour colonne egg_cycles
 pokemon %>% map_df(~sum(is.na(.))) %>% rowSums() # 2448 au total
+
+# on regarde le nombre de pokemeon "doublons" (numero de pokedex)
+sum(duplicated(pokemon[,"pokedex_number"])) # 147 doublons
+# on enleve les doublons
+pokemon2 <- pokemon %>% distinct(pokedex_number, .keep_all = TRUE) # eneleve les Mega et garde uniquement les formes de bases des pokemon (pas les evolutions)
+
 ```
-
-
-
-
 
 Gérer le problème des individus en double : garder qu'une unique forme pour chaque pokémon ou enlever la version "méga" du jeu de données
 
