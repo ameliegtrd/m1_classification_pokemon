@@ -29,8 +29,8 @@ summary(pokemon)
 
 # on regarde s'il y a des donnees manquantes
 pokemon %>% summarise_all(~ sum(is.na(.))) %>% View # pour chaque colonne
-# 492 pour colonne type_2
-# 1 pour colonne weight_kg
+# 492 pour colonne type_2 : normal, tous les pokemon n'ont pas 2 types
+# 1 pour colonne weight_kg : pokemon 1033 Eternatus Eternamax
 # 3 pour colonne ability_1
 # 529 pour colonne ability_2
 # 232 pour colonne ability_hidden
@@ -44,6 +44,11 @@ pokemon %>% summarise_all(~ sum(is.na(.))) %>% View # pour chaque colonne
 # 1 pour colonne egg_cycles
 pokemon %>% map_df(~sum(is.na(.))) %>% rowSums() # 2448 au total
 ```
+
+
+
+
+
 Gérer le problème des individus en double : garder qu'une unique forme pour chaque pokémon ou enlever la version "méga" du jeu de données
 
 Notes de gael (pro de pokémon) : 
