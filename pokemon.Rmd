@@ -9,4 +9,85 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Librairies
+```{r library, eval=TRUE, include=TRUE}
+# definition des librairies dont on a besoin
+load_lib <- c("tidyverse")
+# packages necessaires qui ne sont pas installes
+install_lib <- load_lib[!load_lib %in% installed.packages()] 
+# installation des packages manquants
+for (lib in install_lib) install.packages(lib,dependencies=TRUE) 
+# chargement des packages
+sapply(load_lib,require,character=TRUE)
+```
 
+## Importation des donnéees
+```{r data, eval=TRUE, include=TRUE}
+pokemon <- read_delim(file="pokedex.csv", delim = ",", col_names = TRUE)
+str(pokemon)
+summary(pokemon)
+
+# on regarde s'il y a des donnees manquantes
+pokemon %>% summarise_all(~ sum(is.na(.))) %>% View # pour chaque colonne
+# 492 pour colonne type_2
+# 1 pour colonne weight_kg
+# 3 pour colonne ability_1
+# 529 pour colonne ability_2
+# 232 pour colonne ability_hidden
+# 18 pour colonne catch_rate
+# 115 pour colonne base_friendship
+# 120 pour colonne base_experience
+# 1 pour colonne growth_rate
+# 3 pour colonne egg_type_1
+# 760 pour colonne egg_type_2
+# 173 pour colonne percentage_male
+# 1 pour colonne egg_cycles
+pokemon %>% map_df(~sum(is.na(.))) %>% rowSums() # 2448 au total
+```
+Gérer le problème des individus en double : garder qu'une unique forme pour chaque pokémon ou enlever la version "méga" du jeu de données
+
+Notes de gael (pro de pokémon) : 
+- pokémon acier en général bcp de défense
+- pokémon psy ou/et insecte en général pas bcp d'hp et de défense
+- pokémon psy bcp d'attaques spéciales
+- pokémon combat grosse point d'attaque
+- évolution plus forte au niveau de toutes les stats
+- pokémon légers sont plus rapides 
+- pokémon lourd moins rapodes mais en général des tanks (plus d'hp)
+- les stats sont tjr équilibrée (à part légendaires) : si bcp d'hp alors moins d'attaque etc
+- certains double type vont avoir parfois des stats plus faible mais ils ne sont pas forcément moins fort, ils peuvent bénificier de plus de résistance
+- dragon fortes attaques (trop fort !!)
+- en general les pokemons qui ont le plus de doubles faiblesses (colonnes against) vont etre equilibres et avoir pt des meilleurs stats
+- pokemon fee plutot femelle
+- pokemon roche combat male
+
+## Exploration des données
+```{r}
+pokemon 
+```
+Différentes conclusions en fonction des générations ? Est-ce que la génération 8 a de meilleurs stats que la génération 1 ? plus de hp ?
+
+
+## Analyse des données
+```{r}
+
+```
+
+
+## Classification
+```{r}
+
+```
+On veut regrouper les pokemons. Combien de groupes ? 
+Le but est que si on rajoute de nouveaux pokemons à notre bdd il aille dans le bon groupe. 
+
+## Etude des groupes obtenus
+```{r}
+
+```
+Les groupes doivent être cohérents (on peut s'aider des connaissances de mon frère voir si nos groupes semblent correspondre ou non)
+
+
+## Conclusion
+Etre critique : tester plusieurs modeles en prenant en compte differentes variables voir si on a de meilleures conclusions
+Expliquer en quoi nos choix sont variables, et comment on aurait pu aller plus loin (peut être étudier plus certaines variables ect)
