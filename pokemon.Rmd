@@ -49,6 +49,9 @@ sum(duplicated(pokemon[,"pokedex_number"])) # 147 doublons
 # on enleve les doublons
 pokemon2 <- pokemon %>% distinct(pokedex_number, .keep_all = TRUE) # on enleve les Mega et garde uniquement les formes de bases des pokemon (pas les evolutions)
 
+# suppression de certaines colonnes
+pokemon2 <-select(pokemon,-c(german_name, japanese_name, species, catch_rate, base_friendship, base_experience, growth_rate, egg_type_number, egg_type_1, egg_type_2, egg_cycles))
+
 ```
 
 Gérer le problème des individus en double : garder qu'une unique forme pour chaque pokémon ou enlever la version "méga" du jeu de données
@@ -70,7 +73,38 @@ Notes de gael (pro de pokémon) :
 
 ## Exploration des données
 ```{r}
-pokemon 
+pokemon2 
+
+## Afficher le nombre de pokemons par generation
+# on cree un tableau avec le nombre de pokemons par generation 
+nb_pokemon_gen <- pokemon2 %>% count(generation)  
+# on affiche la table obtenue
+knitr::kable(nb_pokemon_gen) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+
+## Afficher le nombre de pokemons par status
+# on cree un tableau avec le nombre de pokemons par generation 
+nb_pokemon_status <- pokemon2 %>% count(status)  
+# on affiche la table obtenue
+knitr::kable(nb_pokemon_status) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+
+## Reprentation des types(1) de pokemons
+# pour chaque type_1, on compte le nombre de fois qu'il apparait dans la bdd
+pokemon_type_1 <- pokemon2 %>% count(type_1) %>% arrange(desc(n))
+# representation graphique (avec rAmcharts) des genres dans le top
+amBarplot(x = "type_1", y = "n", data = filter(pokemon_type_1), labelRotation = -45, main="Représentation des types de pokemons",xlab="Type",ylab="Nombre de types")
+
+## Reprentation des types(2) de pokemons
+# pour chaque type_2, on compte le nombre de fois qu'il apparait dans la bdd
+pokemon_type_2 <- pokemon2 %>% count(type_2) %>% arrange(desc(n))
+# representation graphique (avec rAmcharts) des genres dans le top
+amBarplot(x = "type_2", y = "n", data = filter(pokemon_type_2), labelRotation = -45, main="Représentation des types de pokemons",xlab="Type",ylab="Nombre de types")
+# on peut voir que 492 pokemons n'ont pas second type
+
+## Boxplot de la taille des pokemons
+amBoxplot(pokemon2$height_m, data=pokemon2, ylim = c(0,12), xlab="", ylab="Taille en mètre", main="Boxplot de la taille des pokemon")
+
+## Boxplot du poids des pokemons
+amBoxplot(pokemon2$weight_kg, data=pokemon2, ylim = c(0,600), xlab="", ylab="Poids en kg", main="Boxplot du poids des pokemon")
 ```
 Différentes conclusions en fonction des générations ? Est-ce que la génération 8 a de meilleurs stats que la génération 1 ? plus de hp ?
 
