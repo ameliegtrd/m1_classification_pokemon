@@ -114,7 +114,7 @@ pokemon3$status <- as_factor(pokemon3$status)
 class(pokemon3$status)
 levels(pokemon3$status) # du moins rare au plus rare
 # on recode : 1 pour Normal, 2 pour Sub Legendary, 3 pour Legendary et 4 pour Mythical
-pokemon3$status <- as.numeric(pokemon3$status)
+# pokemon3$status <- as.numeric(pokemon3$status)
 
 # ## pour type_1
 # # on convertit en facteur
@@ -133,8 +133,20 @@ pokemon3$status <- as.numeric(pokemon3$status)
 # pokemon3$type_2 <- fct_relevel(pokemon3$type_2,sort)
 # pokemon3$type_2 <- as.numeric(pokemon3$type_2)
 
-##
-pokemon3 <- pokemon3 %>% select(-c(pokedex_numbers))
+## on fait une AFCM sur les var qualitatives
+poke_quali <- pokemon3 %>% select(status,type_1, type_2)
+## analyse des correspondances sur tableau lexical
+pokemon_afcm <- MCA(poke_quali)
+# representation des inerties
+library("factoextra")
+fviz_screeplot(pokemon_afcm)
+
+# representation des colonnes dans le plan
+library("explor")
+res <- explor::prepare_results(pokemon_afcm)
+# on garde les scores des pokemon selon les axes
+score_ind <- res$ind$Coord
+# 
 
 ```
 On a changé les valeurs pour les types de sorte que :
@@ -169,29 +181,56 @@ FAMD(pokemon3 %>% select(-c(1)))
 
 ```
 
-AFCM
-```{r}
-library(FactoMineR)
-#data avec les donnees qualitatives
-pokemon_quali <- pokemon2 %>% select(c("status","type_1","type_2",))
-
-afcm_pok <- MCA(pokemon_quali)
-barplot(afcm_pok$eig[,2])
-plot(afcm_pok, choix="var")
-
-plotellipses(afcm_pok)
-
-# graphique 
-plot(afcm_pok, choix = "ind", invisible="ind")
-```
 
 
 ## Classification
 ```{r}
+## avec uniquement variable quantitatives
+pokemon.sc = scale(pokemon3 %>% select(-c(name,pokedex_number,status,type_1, type_2)))
+apply(pokemon.sc,2,mean)
+apply(pokemon.sc,2,sd)
 
+d=dist(pokemon.sc)
+
+cah.ward = hclust(d,method="ward.D")
+plot(cah.ward,hang=-1)
+
+plot(rev(cah.ward$height)[1:20],type="b")
+
+# on choisit 5 groupes
+gpe.ward = cutree(cah.ward,k=5)
+sort(gpe.ward)
+
+dend = as.dendrogram(cah.ward)
+library(dendextend)
+dend %>% set("branches_k_color", k = 5) %>% set("labels_color",k=5) %>% set("labels_cex",0.8) %>% plot
+# Pour interpréter chacun des groupes, on peut commencer par calculer quelques statistiques descriptives sur ces derniers (moyennes par groupes, rapport de corrélation...)
 ```
-On veut regrouper les pokemons. Combien de groupes ? 
+On veut regrouper les pokemons. Combien de groupes ?  
 Le but est que si on rajoute de nouveaux pokemons à notre bdd il aille dans le bon groupe. 
+
+```{r}
+pok = as.data.frame(pokemon.sc)
+pok$groupe = as.factor(gpe.ward)
+par(mfrow=c(1,2))
+acp = PCA(pok,scale.unit=TRUE,graph=F,quali.sup=30)
+plot(acp,choix="var")
+plot(acp,choix="ind",habillage = 10,col.hab=c("green","blue","red","orange","magenta"),autoLab="no")
+```
+
+
+# ```{r}
+# par(mfrow=c(1,1))
+# fromage = read.table("fromage.txt",header=TRUE,row.names = 1)
+# fromage = as.data.frame(scale(fromage))
+# acp = princomp(fromage,cor=T,scores=T)
+# biplot(acp)
+# plot(acp$scores[,1],acp$scores[,2],type="n",xlim=c(-5,5),ylim=c(-5,5))
+# text(acp$scores[,1],acp$scores[,2],col=gpe.ward,cex=0.65,labels=rownames(fromage))
+# abline(h=0,lwd=0.5,lty=2);abline(v=0,lwd=0.5,lty=2)
+# ```
+
+
 
 ## Etude des groupes obtenus
 ```{r}
