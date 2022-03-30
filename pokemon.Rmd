@@ -133,6 +133,9 @@ levels(pokemon3$status) # du moins rare au plus rare
 # pokemon3$type_2 <- fct_relevel(pokemon3$type_2,sort)
 # pokemon3$type_2 <- as.numeric(pokemon3$type_2)
 
+# Renommer les NA
+pokemon3$type_2  <- fct_explicit_na(pokemon3$type_2 , "Aucun")
+
 ## on fait une AFCM sur les var qualitatives
 poke_quali <- pokemon3 %>% select(status,type_1, type_2)
 ## analyse des correspondances sur tableau lexical
