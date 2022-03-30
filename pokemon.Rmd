@@ -169,6 +169,11 @@ FAMD(pokemon3 %>% select(-c(1)))
 
 ```
 
+AFCM
+```{r}
+library(FactoMineR)
+pokemon_quali <- pokemon2 %>% select(c("name","status","type_1","type_2",))
+```
 
 
 ## Classification
