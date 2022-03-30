@@ -180,8 +180,28 @@ FAMD(pokemon3 %>% select(-c(1)))
 
 
 ```
+AFCM
+```{r}
+#on cree la base de donnees avec uniquement les variables qualitatives pour l'AFCM
+pokemon_quali <- pokemon2 %>% select(status,type_1,type_2)
+
+#calcul de l'AFCM
+afcm_pok <- MCA(pokemon_quali)
+
+#choix du nombre d'axe
+barplot(afcm_pok$eig[,2]) #on garde tous les axes
+
+#representation des variables
+plot(afcm_pok, choix="var")
+
+#representation barycentrique
+plotellipses(afcm_pok)
+
+# representation des individus
+plot(afcm_pok, choix = "ind", invisible="ind")
 
 
+```
 
 ## Classification
 ```{r}
