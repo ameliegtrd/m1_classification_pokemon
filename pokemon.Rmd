@@ -242,16 +242,24 @@ plot(acp,choix="ind",habillage = 10,col.hab=c("green","blue","red","orange","mag
 ```
 
 
-# ```{r}
-# par(mfrow=c(1,1))
-# fromage = read.table("fromage.txt",header=TRUE,row.names = 1)
-# fromage = as.data.frame(scale(fromage))
-# acp = princomp(fromage,cor=T,scores=T)
-# biplot(acp)
-# plot(acp$scores[,1],acp$scores[,2],type="n",xlim=c(-5,5),ylim=c(-5,5))
-# text(acp$scores[,1],acp$scores[,2],col=gpe.ward,cex=0.65,labels=rownames(fromage))
-# abline(h=0,lwd=0.5,lty=2);abline(v=0,lwd=0.5,lty=2)
-# ```
+```{r}
+par(mfrow=c(1,1))
+
+pokacp = pokemon3 %>%
+  select(-c(status,type_1, type_2, percentage_male))
+
+pokacp %>% summarise_all(~ sum(is.na(.)))%>% View #il y a 122 NA dans percentage_male
+#J'AI FAIT L'ANALYSE SANS LA COLONNE PERCENTAGE_MALE LE TEMPS DE VOIR CE QU'ON EN FAIT
+
+pokacp = as.data.frame(scale(pokacp))
+acp = princomp(pokacp,cor=T,scores=T)
+biplot(acp)
+
+
+plot(acp$scores[,1],acp$scores[,2],type="n",xlim=c(-5,5),ylim=c(-5,5))
+text(acp$scores[,1],acp$scores[,2],col=gpe.ward,cex=0.65,labels=rownames(pokacp))
+abline(h=0,lwd=0.5,lty=2);abline(v=0,lwd=0.5,lty=2)
+```
 
 
 
