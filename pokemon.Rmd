@@ -27,7 +27,7 @@ pokemon <- read_delim(file="pokedex.csv", delim = ",", col_names = TRUE)
 summary(pokemon)
 
 # on regarde s'il y a des donnees manquantes
-pokemon %>% summarise_all(~ sum(is.na(.))) %>% View # pour chaque colonne
+pokemon %>% summarise_all(~ sum(is.na(.))) #%>% View # pour chaque colonne
 # 492 pour colonne type_2 : normal, tous les pokemons n'ont pas 2 types
 # 1 pour colonne weight_kg : pokemon 1033 Eternatus Eternamax
 # 3 pour colonne ability_1 : ok
