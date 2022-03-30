@@ -172,7 +172,17 @@ FAMD(pokemon3 %>% select(-c(1)))
 AFCM
 ```{r}
 library(FactoMineR)
-pokemon_quali <- pokemon2 %>% select(c("name","status","type_1","type_2",))
+#data avec les donnees qualitatives
+pokemon_quali <- pokemon2 %>% select(c("status","type_1","type_2",))
+
+afcm_pok <- MCA(pokemon_quali)
+barplot(afcm_pok$eig[,2])
+plot(afcm_pok, choix="var")
+
+plotellipses(afcm_pok)
+
+# graphique 
+plot(afcm_pok, choix = "ind", invisible="ind")
 ```
 
 
