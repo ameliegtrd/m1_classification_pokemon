@@ -1,0 +1,40 @@
+---
+title: "Rapport du projet de classification des Pokémon"
+author: "Elisa Floch, Amélie Goutard et Violette Marmion"
+output:
+  pdf_document: default
+---
+<style>body {text-align: justify}</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+# 1. Prise en main du jeu de données
+Comprehension et nettoyage du jeu de donnees 
+- Données manquantes ?
+- Choix des variables (regroupement ?) en vue d’une classification 
+- Standardisation?
+
+# 2. Classification des individus
+
+Utilisation des algorithmes de classification vus en cours
+- Notions de proximité pour certaines variables (variables Type ou variables against X)
+- Réflexion sur les choix opérés  
+
+Décider d’une classification finale 
+- Nombre de groupes ?
+
+# 3. Étude des groupes obtenus
+
+Caractérisation de la partition obtenue 
+Représentation informative des résultats
+- Graphiques adaptés, représentations factorielles si adaptées
+
+# 4. Conclusions, perspectives et critique
+
+Quels points peuvent être critiqués dans vos choix ?
+Quelles pistes pourraient être explorées pour aller plus loin et/ou mieux explorer ces données ?
+```{r}
+```
