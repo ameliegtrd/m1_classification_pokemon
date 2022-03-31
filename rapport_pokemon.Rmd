@@ -141,7 +141,7 @@ Nous affichons maintenant la représentation barycentrique des axes.
 
 ## 2.2. CAH
 
-Le but est de créer une suite de partitions emboîtées : en n classes, puis en n − 1 classes, etc jusqu’`a obtenir une unique classe.
+Le but est de créer une suite de partitions emboîtées : en n classes, puis en n − 1 classes, etc jusqu’a obtenir une unique classe.
 Nous allons donc choisir le nombre de groupes le plus pertinent à la fin (par comparaison des partitions créées).  
 
 Les caractéristiques de la Classification ascendante hiérarchique sont :  
