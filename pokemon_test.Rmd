@@ -353,12 +353,11 @@ plot_grid(ind_cah, var_cah, ind_kmeans, var_kmeans, ncol=2, nrow=2)
 ## comparaison avec 'type_1'
 # tableau de contingence pour la cah
 table_cont_cah <- table(pokemon_cah$groupe,pokemon3$type_1) %>% as.data.frame() %>% as_tibble() %>% rename(Classe_cah = Var1, Type1 = Var2, Freq_cah = Freq)
-table_cont_cah %>% group_by(Classe_cah,Type1) %>% summarise(nb = Freq)
+table_cont_cah %>% group_by(Classe_cah,Type1) %>% summarise(nb = Freq_cah)
 # tableau de contingence pour Kmeans
 table_cont_kmeans <- table(pokemon_kmeans$groupe,pokemon3$type_1) %>% as.data.frame() %>% as_tibble() %>% rename(Classe_kmeans = Var1, Type1 = Var2, Freq_kmeans = Freq)
 # jointure des tables pour comparer
 table_cont_cah %>% inner_join(table_cont_kmeans) %>% View()
-
 
 ```
 CHOIX : Pour chacune des 2 méthodes, on a compté pour chaque classe le nombre de pokémon par "type_1". (on perd forcément en précision en regardant que pour type_1 mais ça donne déjà une idée de la "justesse" des méthodes).  
@@ -370,7 +369,92 @@ Finalement, les groupes issues de la Kmeans sont graphiquement ceux qu'on aurait
 ## Etude des groupes obtenus  
 Suite au choix de la méthode Kmeans, on peut étudier les groupes obtenus.   
 ```{r}
+## on veut regarder pour chaque groupe, les 'types_1' les plus representes
+# on recupere le nombre de pokemon par type_1
+nb_per_type <- pokemon3 %>% group_by(type_1) %>% summarise(nb=n()) %>% pull(nb)
+# on ajoute une colonne avec le nombre de pokemon par type par classe, qu'on ramene au nombre de pokemon par type_1
+percent_type_group <- table_cont_kmeans %>% mutate(
+  nb_type = rep(nb_per_type,3),
+  proportion = (Freq_kmeans/nb_per_type)
+)
+# on regarde les 3 types les plus representes par groupe
+most_freq_group <- percent_type_group %>% group_by(Classe_kmeans) %>% slice_max(proportion,n=3) %>% select(Classe_kmeans, Type1, proportion)
+knitr::kable(most_freq_group) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+# Groupe 1 : type Rock, Ghost, STeel
+# Groupe 2 : type Psychic, Dragon, Water
+# Groupe 3 : type Grass, Normal, Bug
 
+
+## resume statistique pour chaque groupe
+resume_groupe <- pokemon_kmeans %>% group_by(groupe) %>% summarise(
+  nb_pokemon = n(),
+  poids_moy = mean(weight_kg),
+  taille_moy = mean(height_m),
+  hp_moy = mean(hp),
+  attack_moy = mean(attack),
+  defense_moy = mean(defense),
+  sp_attack_moy = mean(sp_attack),
+  sp_defense_moy = mean(sp_defense),
+  speed_moy = mean(speed),
+  ag_normal_moy = mean(against_normal),
+  ag_fire_moy = mean(against_fire),
+  ag_water_moy = mean(against_water),
+  ag_electric_moy = mean(against_electric),
+  ag_grass_moy = mean(against_grass),
+  ag_ice_moy = mean(against_ice),
+  ag_fight_moy = mean(against_fight),
+  ag_poison_moy = mean(against_poison),
+  ag_ground_moy = mean(against_ground),
+  ag_flying_moy = mean(against_flying),
+  ag_psychic_moy = mean(against_psychic),
+  ag_bug_moy = mean(against_bug),
+  ag_rock_moy = mean(against_rock),
+  ag_ghost_moy = mean(against_ghost),
+  ag_dragon_moy = mean(against_dragon),
+  ag_dark_moy = mean(against_dark),
+  ag_steel_moy = mean(against_steel),
+  ag_fairy_moy = mean(against_fairy)
+)
+
+knitr::kable(resume_groupe %>% t() %>% as.data.frame()) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 
 ```
+D'après le résumé statistique :  
+- Groupe 1 : principalement des types_1 Rock, Ghost, Steel
+             poids élevé
+             attaque élevée
+             pas mal de point de vie (hp)
+             défense élévée
+             pas très rapide (vitesse faible)
+             résiste très bien aux types Normal et Poison
+             assez faible face aux types Water et Flying
+
+- Groupe 2 : principalement des Psychic, Dragon, Water
+             poids moyen (ni élévé ni faible)
+             taille grande
+             beaucoup de points de vie (hp)
+             attaque élevée
+             attaque spéciale élevée
+             rapide (vitesse élevée)
+             faible face au type Ice
+
+- Groupe 3 : principalement des Grass, Normal, Bug
+             poids faible (léger)
+             taille petite
+             pas beaucoup de point de vie (hp)
+             attaque faible
+             défense faible
+             attaque spéciale faible
+             défense spéciale faible
+             pas très rapide (vitesse faible)
+             faible face au type Ice
+             assez faible face aux types Flying, Rock
+
+
+CONCLUSION : Les 3 groupes obtenus avec les Kmeans nous semblent cohérents. En effet, les statistiques par classes rejoignent bien nos intuitions et connaissances sur les Pokémons ainsi que la documentation sur les 18 types de pokémons. 
+
+Cependant, il ne faut pas oublier que nos résultats découlent de nos choix antérieurs, à savoir :
+- le choix de ne pas traiter les variables concernant les groupes d'oeufs, l'espèce, l'habilité, le taux de capture, le lien affectif, l'expérience de base du pokémon, la catégorie de la courbe d'expérience (= points d'expériences nécessaires pour gagner des niveaux) et le pourcentage de mâle. 
+- le pourcentage de mâle est une variable qui aurait sans doute été intéréssante à prendre en compte (par exemple : pokemon fée (Fairy) plutôt femelle, pokemon roche (Rock) et combat (Fighting) plutôt mâle, certains type uniquement asexué). Cette variable prend des NA lorsque le pokémon est asexué, 100 si mâle et 0 si femelle. Pour pouvoir l'intégrer à notre analyse, il aurait fallu prendre en compte les NA comme une catégorie à part entière. Une possibilité aurait été de transformer la variable en variable qualitative (par exemple si >60 alors mâle, si <60 femelle et si NA alors asexué). Mais en procédant de la sorte, nous perdons de l'information.  
+
 
