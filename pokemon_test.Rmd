@@ -221,7 +221,7 @@ plot_grid(ind,var, ncol=2, nrow=1)
 
 ```
 
-CHOIX : on aurait tendance a choisir de regrouper type_1 et type_2 en une seule colonne car la sépartion en groupe semble plus claire suite à l'ACP qu'avec uniquement le type 1. De plus, on garde ainsi tous nos pokémons. 
+CHOIX : on aurait tendance a choisir de regrouper type_1 et type_2 en une seule colonne car la séparation en groupe semble plus claire suite à l'ACP qu'avec uniquement le type 1. De plus, on garde ainsi tous nos pokémons. 
 
 
 ## Classification
@@ -238,6 +238,7 @@ cah.ward = hclust(d,method="ward.D")
 plot(cah.ward,hang=-1)
 ## choix du nombre de groupe (courbe d'inertie des 20 premieres valeurs)
 plot(rev(cah.ward$height)[1:20],type="b")
+
 # NbClust::NbClust(select(pokemon_type12,-c(name,type)), min.nc = 2,max.nc = 15,method="ward.D",index="all")
 
 ```
@@ -345,28 +346,31 @@ Notre choix du nombre de classes est le même avec une CAH et kmeans, ce qui nou
 
 ### Comparaison des résultats de CAH et de Kmeans  
 ```{r}
-pokemon_kmeans
-pokemon_cah
-
 ## comparaison des groupes en fonction des 2 methodes sur les axes factoriels 1 et 2
 plot_grid(ind_cah, var_cah, ind_kmeans, var_kmeans, ncol=2, nrow=2)
 # comme remarque precedemment, les kmeans proposent 3 groupes plus distincts qu'avec la cah
 
-## comparaison avec type 1
+## comparaison avec 'type_1'
+# tableau de contingence pour la cah
 table_cont_cah <- table(pokemon_cah$groupe,pokemon3$type_1) %>% as.data.frame() %>% as_tibble() %>% rename(Classe_cah = Var1, Type1 = Var2, Freq_cah = Freq)
 table_cont_cah %>% group_by(Classe_cah,Type1) %>% summarise(nb = Freq)
-
+# tableau de contingence pour Kmeans
 table_cont_kmeans <- table(pokemon_kmeans$groupe,pokemon3$type_1) %>% as.data.frame() %>% as_tibble() %>% rename(Classe_kmeans = Var1, Type1 = Var2, Freq_kmeans = Freq)
-
+# jointure des tables pour comparer
 table_cont_cah %>% inner_join(table_cont_kmeans) %>% View()
 
 
 ```
-Choix du meilleur algo.
+CHOIX : Pour chacune des 2 méthodes, on a compté pour chaque classe le nombre de pokémon par "type_1". (on perd forcément en précision en regardant que pour type_1 mais ça donne déjà une idée de la "justesse" des méthodes).  
+Ensuite, nous avons regardé les types de pokémon les plus présent par classe. D'après nos connaissances Pokémon, les classes issues de la Kmeans nous semblent les plus cohérentes. En effet, le groupe 1 correspondrait (à priori) aux pokémons ayant de grosse résistance ou pouvant annuler des attaques (ghost). Le groupe 2 aux pokémon ayant des grosse statistiques en attaque spéciales. Enfin, le groupe 3 les pokémons ayant de grosses faiblesses mais des attaques plus fortes. 
+A l'inverse, les groupes issues de la CAH ne sont pas vraiment cohérents ... Le groupe 1 semble être un groupe un peu "fourre tout", le groupe 2 composé presque uniquement de type Fairy et Grass et le groupe 3 rassemble les types Ghost et Steel ensemble qui sont pourtant opposé.  
+Finalement, les groupes issues de la Kmeans sont graphiquement ceux qu'on aurait choisi (représentation sur les axes factorielles) et sont également les plus cohérents vis-à-vis de nos connaissances et de la documentation sur les caractéristiques des types (plus de détails [ici](https://www.crumpe.com/2021/10/chaque-type-de-pokemon-classe-du-plus-nul-au-plus-fort/)).  
+
 
 ## Etude des groupes obtenus  
-Suite au choix de la méthode (cah ou kmeans) on peut étudier les groupes obtenus.   
+Suite au choix de la méthode Kmeans, on peut étudier les groupes obtenus.   
 ```{r}
+
 
 ```
 
