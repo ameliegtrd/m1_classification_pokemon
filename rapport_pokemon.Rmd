@@ -12,10 +12,113 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # 1. Prise en main du jeu de données
+
+*TRAVAIL À FAIRE DANS CETTE PARTIE :*
 Comprehension et nettoyage du jeu de donnees 
-- Données manquantes ?
-- Choix des variables (regroupement ?) en vue d’une classification 
-- Standardisation?
+- Données manquantes ?  
+- Choix des variables (regroupement ?) en vue d’une classification   
+- Standardisation ?
+*À FINIR*
+
+Dans un premier temps, nous allons présenter la base de données ainsi que le sujet de notre étude de classification.
+
+Le jeu de données concerne l’univers des Pokémon.
+La franchise a été créée en 1996.
+Elle est exploitee sous forme de jeux vidéos, mangas,   dessins animés, jeux de cartes ou jeux en réalité augmentée
+Le principe du jeu repose sur la capture, le dressage et les combats de créatures “animales” imaginaires appelées Pokémon et possédant chacun leur caractéristiques propres.  
+
+Le jeu de données proposé contient différentes informations et statistiques concernant chacun des pokemon de la première à la huitime génération (environ 890 individus).  
+
+Les liens suivants ont été utiles pour la réalisation de notre projet :  
+- Pokédia : [le wikipedia des Pokémon](https://www.pokepedia.fr/)    
+- Pokédex : [la base de données des Pokémon](https://www.pokebip.com/pokedex)  
+
+La base de données initiale contenait 1045 lignes et 51 colonnes.
+Une ligne correspond à un Pokémon identifié, uniquement, par son nom et par son numéro dans la base des données des Pokéemon, le Pokédex (non unique). 
+Certains individus apparaissent plusieurs fois car ils ont plusieurs formes ou une évolution supplémentaire dite “méga”.
+Nous avons décidé de conserver une unique forme pour chacun.
+Les variables représentent les caractéristiques nominales telles que le nom (en anglais, en allemand et en japonais), le numéro d’identification, le statut (normal, légendaire, etc), la génération et l'espèce. 
+Mais aussi le type de la créature.
+Les Pokémon ont 1 ou 2 types parmi les 18 types existants.
+Les caractéristiques quantitaves sont aussi présentes.
+Nous retrouvons la taille, le poids, les points de vie, d'attaque, de défense, de vitesse, etc.
+Ensuite, il y a des caractéristiques de dressage, par exemple : le taux de capture.
+Enfin, les dommages reçus contre un certain type.
+Les valeurs des dommages sont égales à 0, 0.5, 1 ou 2.  
+
+
+Dans un second temps, nous allons expliquer notre compréhension du jeu de données. Et montrer comment nous l'avons nettoyé.  
+
+```{r library, eval=TRUE, include=TRUE, results='hide', class.source = 'foldable'}
+### Librairies
+
+# definition des librairies dont on a besoin
+load_lib <- c("tidyverse", "kableExtra", "FactoMineR", "factoextra", "cowplot")
+# packages necessaires qui ne sont pas installes
+install_lib <- load_lib[!load_lib %in% installed.packages()] 
+# installation des packages manquants
+for (lib in install_lib) install.packages(lib,dependencies=TRUE) 
+# chargement des packages
+sapply(load_lib,require,character=TRUE)
+```
+
+```{r data, eval=TRUE, include=TRUE, results='hide'}
+### Importation des donnees et choix des colonnes
+
+## on importe les donneess
+pokemon <- read_delim(file="pokedex.csv", delim = ",", col_names = TRUE)
+# resume statistique
+summary(pokemon)
+
+## on regarde s'il y a des donnees manquantes
+# pour chaque colonne
+pokemon %>% summarise_all(~ sum(is.na(.))) 
+# au total
+pokemon %>% map_df(~sum(is.na(.))) %>% rowSums() # 2448 
+
+## on regarde le nombre de pokemon "doublons" (numero de pokedex)
+sum(duplicated(pokemon[,"pokedex_number"])) # 147 doublons
+## on enleve les doublons
+pokemon2 <- pokemon %>% distinct(pokedex_number, .keep_all = TRUE) # on enleve les Mega et garde uniquement les formes de bases des pokemon (pas les evolutions)
+
+## suppression de certaines colonnes
+pokemon2 <- pokemon2 %>% select(-c("...1",german_name, japanese_name, species, catch_rate, base_friendship, base_experience, growth_rate, egg_type_number, egg_type_1, egg_type_2, egg_cycles, abilities_number, ability_1, ability_2, ability_hidden, total_points))
+```
+
+Après avoir importé les données, nous regardons s'il y a des données manquantes.
+Par exemple, dans la colonne *type_2*, nous constatons qu'il y a 492 données manquantes.
+Ce qui semble normal puisque tous les pokemons n'ont pas 2 types.
+Autre exemple, la colonne *percentage_male* comporte 173 données manquantes.
+Au total, nous obtenons 2448 données manquantes.  
+
+Ensuite, nous avons regardé le nombre de Pokémon qui étaient en doublons, en fonction du numéro de Pokédex.
+Nous avons obtenu 147 doublons que nous avons immédiatement supprimés.
+Suite à cela, nous avons enlevé les individus ayant une évolution supplémentaire dite “méga”.
+Notre base est désormais uniquement constituée des Pokémon ayant une forme classique (la forme de base).
+Nous obtenons donc une base contenant 898 individus.  
+
+Puis, nous avons décidé de supprimer des colonnes, selon nous, inutiles à notre analyse.
+Telles que *german_name*, *japanese_name*, *catch_rate*, etc.
+Nous avons donc conservé 34 colonnes.  
+
+Enfin, nous avons fait une exploration des données à l'aide de quelques statistiques descriptives.  
+
+Le tableau ci-dessous montre le nombre de Pokémon par génération :
+```{r echo=TRUE, results='asis'}
+## Afficher le nombre de pokemons par generation
+# on cree un tableau avec le nombre de pokemons par generation 
+# nb_pokemon_gen <- pokemon2 %>% count(generation)  
+# on affiche la table obtenue
+knitr::kable(pokemon2 %>% count(generation) ) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+Nous remarquons que c'est la cinquième génération qui comporte le plus de Pokémon. 
+Il y en a 156.  
+
+Le graphique ci-dessous représente la variable *type_1* de Pokémon :
+```{r}
+ggplot(pokemon2) + aes(x=reorder(type_1,type_1, function(x)-length(x)), fill=type_1) + geom_bar() + ggtitle("Représentation des types 1 de pokemons") +  xlab("Type 1") + ylab("Nombre de types") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+Le type *Water* est le plus repésenté puisque quasiment 125 créatures incarnent ce type.
 
 # 2. Classification des individus
 
