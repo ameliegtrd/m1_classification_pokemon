@@ -93,14 +93,14 @@ ggplot(pokemon2) + aes(x = "", y=weight_kg) + geom_boxplot(fill="pink") + ggtitl
 ```
 
 
-## Analyse Factorielle  
+## Analyse en Composante Principales   
 On cherche à voir si, à partir des statistiques à disposition et qu'on a gardé, on peut regrouper les pokemons par type. En combien de types différents ?  
 On sait que dans le jeu, un pokémon a obligatoirement 1 type, mais peut également avoir 2 types. 
 Il y a 18 types possibles, parmis les suivants :  
 Grass, Fire, Water, Bug, Normal, Poison, Electric, Ground, Fairy, Fighting, Psychic, Rock, Ghost,
 Ice, Dragon, Dark, Steel, Flying  
 
-Nous cherchons donc dans un premier temps à représenter les individus (=les pokemons) et à voir graphiquement par une ACP si des "groupes" se distinguent (i.e si certains individus sont plus proches par rapport aux statistique que d'autres).  
+Nous cherchons donc dans un premier temps à représenter les individus (=les pokemons) et à voir graphiquement par une ACP si des "groupes" se distinguent (i.e si certains individus sont plus proches par rapport aux statistiques que d'autres).  
 
 Ensuite, nous chercherons à confirmer (ou non) notre intuition par une classification. Nous essayerons de retrouver les types et donc de faire comme si nous n'avions pas cette information. L'objectif étant de bien prédire le type d'un pokémon lorsqu'on en rencontre un nouveau (= n'existant pas dans la base de donnnées).
 
@@ -245,6 +245,7 @@ D'après la  courbe d'inertie des 20 premières valeurs, on choisirait plutôt 3
 
 ```{r}
 ### partition en 3 groupes
+pokemon_cah <- pokemon_type12
 ## creation des classes
 K=3
 gpe.ward = cutree(cah.ward,k=K)
@@ -257,64 +258,114 @@ dend = as.dendrogram(cah.ward)
 library(dendextend)
 dend %>% set("branches_k_color", k = K) %>% set("labels_color",k=K) %>% set("labels_cex",0.8) %>% plot
 ## on compare les groupes avec les types
-pokemon_type12$gpe.ward = as.factor(gpe.ward)
-table(pokemon_type12$gpe.ward,pokemon3$type_1)
+pokemon_cah$groupe = as.factor(gpe.ward)
+table(pokemon_cah$groupe,pokemon3$type_1)
 # d'apres nos connaissances en pokemon, les groupes ne sont pas si mal mais peut-etre que nous pouvns faire mieux avec plus de classes, sans doute en allant jusqu'a 5 ou 6 classes
 
-# representation des groupes sur les axes factoriels
-acp <- PCA(X = select(pokemon_type12,-c(name,type)), scale.unit=TRUE, quali.sup=29, graph=FALSE)
-var2 <- plot(acp,choix="var")
-ind2 <- plot(acp,choix="ind", habillage = 29, col.hab = c("blue","orange","magenta"), autoLab="no")
-plot_grid(ind2,var2, ncol=2, nrow=1)
+## representation des groupes sur les axes factoriels
+acp_cah <- PCA(X = select(pokemon_cah,-c(name,type)), scale.unit=TRUE, quali.sup=29, graph=FALSE)
+var_cah <- plot(acp_cah,choix="var")
+ind_cah <- plot(acp_cah,choix="ind", habillage = 29, col.hab = c("blue","orange","magenta"), autoLab="no")
+plot_grid(ind_cah,var_cah, ncol=2, nrow=1)
 # le graphique des individus confirme bien notre intuition : les classes 2 et 3 sont bien distinctes, la classe 1 l'est globament aussi mais se melange un peu avec les classes 2 et 3
 
-## on teste pour differentes valeurs de K (il suffit de changer la valeur de K et de runner le reste du code)
-# creation des classes
+
+### on teste pour differentes valeurs de K (il suffit de changer la valeur de K et de runner le reste du code)
+pokemon_cahTest <- pokemon_type12
+## creation des classes
 K=4
 gpe.ward = cutree(cah.ward,k=K)
 gpe.ward
-# representation des classes sur le dendrogramme
+## representation des classes sur le dendrogramme
 plot(cah.ward,hang=-1)
 rect.hclust(cah.ward, K, border ="blue")
 # ou encore
 dend = as.dendrogram(cah.ward)
 library(dendextend)
 dend %>% set("branches_k_color", k = K) %>% set("labels_color",k=K) %>% set("labels_cex",0.8) %>% plot
-
 ## on compare les groupes avec les types
-pokemon_type12$gpe.ward = as.factor(gpe.ward)
-table(pokemon_type12$gpe.ward,pokemon3$type_1)
-
+pokemon_cahTest$groupe = as.factor(gpe.ward)
+table(pokemon_cahTest$groupe,pokemon3$type_1)
 # representation des groupes sur les axes factoriels
-acp <- PCA(X = select(pokemon_type12,-c(name,type)), scale.unit=TRUE, quali.sup=29, graph=FALSE)
-var3 <- plot(acp,choix="var")
-ind3 <- plot(acp,choix="ind", habillage = 29, autoLab="no")
-plot_grid(ind3,var3, ncol=2, nrow=1)
+acp <- PCA(X = select(pokemon_cahTest,-c(name,type)), scale.unit=TRUE, quali.sup=29, graph=FALSE)
+var2 <- plot(acp,choix="var")
+ind2 <- plot(acp,choix="ind", habillage = 29, autoLab="no")
+plot_grid(ind2,var2, ncol=2, nrow=1)
 
 ```
-Pour 3 groupes : les classes 2 et 3 sont bien distinctes, la classe 1 l'est gloabelement mais un peu plus mélangée avec les classes 2 et 3. 
-Pour 4 groupes : on retrouve ici 2 classes bien distinctes (4 et 2) tandis que les classes 1 et 3 sont plus mélangées. 
-Pour 5 groupes : toujours 2 classes bien distinctes (5 et 3) mais les 3 autres classes sont moins évidente. La classe 1 se distingue un peu plus de la classe 5 que les classes 2 et 4. 
-Pour 6 groupes : on remarque 3 classes distinctes (3, 5 et 6), correspondant bien au graphique des variables (3 groupes de fleches allant dans 3 directions différentes). la classe 1 se distingue aussi un peu des classes 3,5 et 6 mais reste mélangée aux classes 4, 2 et 3. 
-Ainsi, avec une CAH, nous décidons de garder 3 classes (choix pas forcément très évident mais c'est celui qui nous semble le plus raisonnable). Nous allons voir si notre choix se confirme avec les kmeans. 
+Pour 3 groupes : les classes 2 et 3 sont bien distinctes, la classe 1 l'est gloabelement mais un peu plus mélangée avec les classes 2 et 3.  
+Pour 4 groupes : on retrouve ici 2 classes bien distinctes (4 et 2) tandis que les classes 1 et 3 sont plus mélangées.  
+Pour 5 groupes : toujours 2 classes bien distinctes (5 et 3) mais les 3 autres classes sont moins évidente. La classe 1 se distingue un peu plus de la classe 5 que les classes 2 et 4.  
+Pour 6 groupes : on remarque 3 classes distinctes (3, 5 et 6), correspondant bien au graphique des variables (3 groupes de fleches allant dans 3 directions différentes). la classe 1 se distingue aussi un peu des classes 3,5 et 6 mais reste mélangée aux classes 4, 2 et 3.  
+Ainsi, avec une CAH, nous décidons de garder 3 classes (choix pas forcément très évident mais c'est celui qui nous semble le plus raisonnable). Nous allons voir si notre choix se confirme avec les kmeans.  
 
 ### Avec kmeans
 ```{r}
+### partition en 3 groupes 
+pokemon_kmeans <- pokemon_type12
+## kmeans
+K = 3
+cl = kmeans(pokemon.sc,K,nstart=50)
+cluster::clusplot(pokemon_kmeans,cl$cluster,labels=4)
+## creation des classes
+gpe <- cl$cluster
+pokemon_kmeans$groupe <- as.factor(gpe)
+## on compare les groupes avec les types
+table(pokemon_kmeans$groupe,pokemon3$type_1)
+## representation des groupes sur le premier plan factoriel
+acp_kmeans <- PCA(X = select(pokemon_kmeans,-c(name,type)), scale.unit=TRUE, quali.sup=29, graph=FALSE)
+var_kmeans <- plot(acp_kmeans,choix="var")
+ind_kmeans <- plot(acp_kmeans,choix="ind", habillage = 29, autoLab="no")
+plot_grid(ind_kmeans,var_kmeans, ncol=2, nrow=1)
+# les 3 classes sont bien distinctes (voir meme plus qu'avec la cah)
+# cependant, les 3 groupes proposes par la kmeans ne sont pas tout a fait les memes qu'avec la cah
+
+
+### partition en K groupes (on a modifie la valeur de K pour comparer)
+pokemon_kmeansTest <- pokemon_type12
+## kmeans
+K = 6
+cl = kmeans(pokemon.sc,K,nstart=50)
+cluster::clusplot(pokemon_kmeansTest,cl$cluster,labels=4)
+## creation des classes
+gpe <- cl$cluster
+pokemon_kmeansTest$groupe <- as.factor(gpe)
+## on compare les groupes avec les types
+table(pokemon_kmeansTest$groupe,pokemon3$type_1)
+## representation des groupes sur le premier plan factoriel
+acp <- PCA(X = select(pokemon_kmeansTest,-c(name,type)), scale.unit=TRUE, quali.sup=29, graph=FALSE)
+var4 <- plot(acp,choix="var")
+ind4 <- plot(acp,choix="ind", habillage = 29, autoLab="no")
+plot_grid(ind4,var4, ncol=2, nrow=1)
 
 ```
-On veut regrouper les pokemons. Combien de groupes ?  
-Le but est que si on rajoute de nouveaux pokemons à notre bdd il aille dans le bon groupe. 
+D'après les résultats des kmeans, on choisirait ici aussi plutôt 3 classes.  
+Notre choix du nombre de classes est le même avec une CAH et kmeans, ce qui nous rassure dans notre choix. Cependant, les groupes n'étant pas vraiment les mêmes en fonction des 2 méthodes, nous allons les comparer afin de ne retenir qu'une seule d'entre elles.  
 
 
-### Comparaison des résultats de CAH et de Kmeans
-Choix du meilleur algo.
+### Comparaison des résultats de CAH et de Kmeans  
 ```{r}
+pokemon_kmeans
+pokemon_cah
+
+## comparaison des groupes en fonction des 2 methodes sur les axes factoriels 1 et 2
+plot_grid(ind_cah, var_cah, ind_kmeans, var_kmeans, ncol=2, nrow=2)
+# comme remarque precedemment, les kmeans proposent 3 groupes plus distincts qu'avec la cah
+
+## comparaison avec type 1
+table_cont_cah <- table(pokemon_cah$groupe,pokemon3$type_1) %>% as.data.frame() %>% as_tibble() %>% rename(Classe_cah = Var1, Type1 = Var2, Freq_cah = Freq)
+table_cont_cah %>% group_by(Classe_cah,Type1) %>% summarise(nb = Freq)
+
+table_cont_kmeans <- table(pokemon_kmeans$groupe,pokemon3$type_1) %>% as.data.frame() %>% as_tibble() %>% rename(Classe_kmeans = Var1, Type1 = Var2, Freq_kmeans = Freq)
+
+table_cont_cah %>% inner_join(table_cont_kmeans) %>% View()
+
 
 ```
+Choix du meilleur algo.
 
-
-## Etude des groupes obtenus
-Suite au choix de la méthode (cah ou kmeans) on peut étudier les groupes obtenus.  
+## Etude des groupes obtenus  
+Suite au choix de la méthode (cah ou kmeans) on peut étudier les groupes obtenus.   
 ```{r}
 
 ```
