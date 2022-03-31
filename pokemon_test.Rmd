@@ -217,13 +217,13 @@ ind <- plot(acp_pokemonType12,choix="ind") # avec les individus supplementaires
 plot_grid(ind,var, ncol=2, nrow=1)
 # on ne peut certes pas lire clairement les types etant donne qu'il y en a 177, mais 5 groupes semblent se distinguer :
 # un groupe en haut a gauche, un en haut a droite, un en haut a droite, un plutot vers le bas a gauche (mais assez proche du centre), puis 2 en bas a droite
+# 
 
 ```
 
 CHOIX : on aurait tendance a choisir de regrouper type_1 et type_2 en une seule colonne car la sépartion en groupe semble plus claire suite à l'ACP qu'avec uniquement le type 1. De plus, on garde ainsi tous nos pokémons. 
 
 
-A FAIRE JEUDI MATIN
 ## Classification
 ### Avec CAH
 ```{r}
@@ -244,9 +244,33 @@ plot(rev(cah.ward$height)[1:20],type="b")
 D'après la  courbe d'inertie des 20 premières valeurs, on choisirait plutôt 3 ou 5/6 groupes. Le choix n'est pas vraiment clair, nous allons tester avec 3, 5 et 6 groupes et nous choisirons ce qui semble le plus convenable.
 
 ```{r}
-## partition en 3 groupes
-# creation des classes
+### partition en 3 groupes
+## creation des classes
 K=3
+gpe.ward = cutree(cah.ward,k=K)
+gpe.ward
+## representation des classes sur le dendrogramme
+plot(cah.ward,hang=-1)
+rect.hclust(cah.ward, K, border ="blue")
+# ou encore
+dend = as.dendrogram(cah.ward)
+library(dendextend)
+dend %>% set("branches_k_color", k = K) %>% set("labels_color",k=K) %>% set("labels_cex",0.8) %>% plot
+## on compare les groupes avec les types
+pokemon_type12$gpe.ward = as.factor(gpe.ward)
+table(pokemon_type12$gpe.ward,pokemon3$type_1)
+# d'apres nos connaissances en pokemon, les groupes ne sont pas si mal mais peut-etre que nous pouvns faire mieux avec plus de classes, sans doute en allant jusqu'a 5 ou 6 classes
+
+# representation des groupes sur les axes factoriels
+acp <- PCA(X = select(pokemon_type12,-c(name,type)), scale.unit=TRUE, quali.sup=29, graph=FALSE)
+var2 <- plot(acp,choix="var")
+ind2 <- plot(acp,choix="ind", habillage = 29, col.hab = c("blue","orange","magenta"), autoLab="no")
+plot_grid(ind2,var2, ncol=2, nrow=1)
+# le graphique des individus confirme bien notre intuition : les classes 2 et 3 sont bien distinctes, la classe 1 l'est globament aussi mais se melange un peu avec les classes 2 et 3
+
+## on teste pour differentes valeurs de K (il suffit de changer la valeur de K et de runner le reste du code)
+# creation des classes
+K=4
 gpe.ward = cutree(cah.ward,k=K)
 gpe.ward
 # representation des classes sur le dendrogramme
@@ -256,19 +280,23 @@ rect.hclust(cah.ward, K, border ="blue")
 dend = as.dendrogram(cah.ward)
 library(dendextend)
 dend %>% set("branches_k_color", k = K) %>% set("labels_color",k=K) %>% set("labels_cex",0.8) %>% plot
-# Pour interpréter chacun des groupes, on peut commencer par calculer quelques statistiques descriptives sur ces derniers (moyennes par groupes, rapport de corrélation...)
 
 ## on compare les groupes avec les types
-pokemon_type12$gpe.ward = gpe.ward
+pokemon_type12$gpe.ward = as.factor(gpe.ward)
 table(pokemon_type12$gpe.ward,pokemon3$type_1)
+
 # representation des groupes sur les axes factoriels
-
-## partition en 5 groupes
-
-## partition en 6 groupes
+acp <- PCA(X = select(pokemon_type12,-c(name,type)), scale.unit=TRUE, quali.sup=29, graph=FALSE)
+var3 <- plot(acp,choix="var")
+ind3 <- plot(acp,choix="ind", habillage = 29, autoLab="no")
+plot_grid(ind3,var3, ncol=2, nrow=1)
 
 ```
-
+Pour 3 groupes : les classes 2 et 3 sont bien distinctes, la classe 1 l'est gloabelement mais un peu plus mélangée avec les classes 2 et 3. 
+Pour 4 groupes : on retrouve ici 2 classes bien distinctes (4 et 2) tandis que les classes 1 et 3 sont plus mélangées. 
+Pour 5 groupes : toujours 2 classes bien distinctes (5 et 3) mais les 3 autres classes sont moins évidente. La classe 1 se distingue un peu plus de la classe 5 que les classes 2 et 4. 
+Pour 6 groupes : on remarque 3 classes distinctes (3, 5 et 6), correspondant bien au graphique des variables (3 groupes de fleches allant dans 3 directions différentes). la classe 1 se distingue aussi un peu des classes 3,5 et 6 mais reste mélangée aux classes 4, 2 et 3. 
+Ainsi, avec une CAH, nous décidons de garder 3 classes (choix pas forcément très évident mais c'est celui qui nous semble le plus raisonnable). Nous allons voir si notre choix se confirme avec les kmeans. 
 
 ### Avec kmeans
 ```{r}
