@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Librairies
 ```{r library, eval=TRUE, include=TRUE}
 # definition des librairies dont on a besoin
-load_lib <- c("tidyverse", "kableExtra", "FactoMineR", "factoextra")
+load_lib <- c("tidyverse", "kableExtra", "FactoMineR", "factoextra", "cowplot")
 # packages necessaires qui ne sont pas installes
 install_lib <- load_lib[!load_lib %in% installed.packages()] 
 # installation des packages manquants
@@ -193,7 +193,7 @@ plot_grid(ind,var, ncol=2, nrow=1)
 
 ```
 
-On considère maintenant tous les pokémons (type 1 et 2). Pour cela, on regroupe les colonnes "type_1" et "type_2" en une seule, intitulée "type". On a donc ... type possible pour chaque pokémon. 
+On considère maintenant tous les pokémons (type 1 et 2). Pour cela, on regroupe les colonnes "type_1" et "type_2" en une seule, intitulée "type". On a donc 177 types possible pour chaque pokémon. 
 ```{r}
 ### on regroupe les colonnes type_1 et type_2 en une intutule type
 pokemon_type12 <- pokemon3 %>% 
@@ -226,46 +226,68 @@ CHOIX : on aurait tendance a choisir de regrouper type_1 et type_2 en une seule 
 A FAIRE JEUDI MATIN
 ## Classification
 ### Avec CAH
-
-### Avec kmeans
-
-Choix du meilleur algo.
 ```{r}
-## avec uniquement variable quantitatives
-pokemon.sc = scale(pokemon3 %>% select(-c(name,pokedex_number,status,type_1, type_2)))
+## on standardise les donnees
+pokemon.sc = scale(select(pokemon_type12,-c(name,type)))
 apply(pokemon.sc,2,mean)
 apply(pokemon.sc,2,sd)
-
+## distance euclidienne
 d=dist(pokemon.sc)
-
+## cah
 cah.ward = hclust(d,method="ward.D")
 plot(cah.ward,hang=-1)
-
+## choix du nombre de groupe (courbe d'inertie des 20 premieres valeurs)
 plot(rev(cah.ward$height)[1:20],type="b")
+# NbClust::NbClust(select(pokemon_type12,-c(name,type)), min.nc = 2,max.nc = 15,method="ward.D",index="all")
 
-# on choisit 5 groupes
-gpe.ward = cutree(cah.ward,k=5)
-sort(gpe.ward)
+```
+D'après la  courbe d'inertie des 20 premières valeurs, on choisirait plutôt 3 ou 5/6 groupes. Le choix n'est pas vraiment clair, nous allons tester avec 3, 5 et 6 groupes et nous choisirons ce qui semble le plus convenable.
 
+```{r}
+## partition en 3 groupes
+# creation des classes
+K=3
+gpe.ward = cutree(cah.ward,k=K)
+gpe.ward
+# representation des classes sur le dendrogramme
+plot(cah.ward,hang=-1)
+rect.hclust(cah.ward, K, border ="blue")
+# ou encore
 dend = as.dendrogram(cah.ward)
 library(dendextend)
-dend %>% set("branches_k_color", k = 5) %>% set("labels_color",k=5) %>% set("labels_cex",0.8) %>% plot
+dend %>% set("branches_k_color", k = K) %>% set("labels_color",k=K) %>% set("labels_cex",0.8) %>% plot
 # Pour interpréter chacun des groupes, on peut commencer par calculer quelques statistiques descriptives sur ces derniers (moyennes par groupes, rapport de corrélation...)
+
+## on compare les groupes avec les types
+pokemon_type12$gpe.ward = gpe.ward
+table(pokemon_type12$gpe.ward,pokemon3$type_1)
+# representation des groupes sur les axes factoriels
+
+## partition en 5 groupes
+
+## partition en 6 groupes
+
+```
+
+
+### Avec kmeans
+```{r}
+
 ```
 On veut regrouper les pokemons. Combien de groupes ?  
 Le but est que si on rajoute de nouveaux pokemons à notre bdd il aille dans le bon groupe. 
 
+
+### Comparaison des résultats de CAH et de Kmeans
+Choix du meilleur algo.
 ```{r}
-pok = as.data.frame(pokemon.sc)
-pok$groupe = as.factor(gpe.ward)
-par(mfrow=c(1,2))
-acp = PCA(pok,scale.unit=TRUE,graph=F,quali.sup=30)
-plot(acp,choix="var")
-plot(acp,choix="ind",habillage = 10,col.hab=c("green","blue","red","orange","magenta"),autoLab="no")
+
 ```
+
 
 ## Etude des groupes obtenus
 Suite au choix de la méthode (cah ou kmeans) on peut étudier les groupes obtenus.  
 ```{r}
 
 ```
+
