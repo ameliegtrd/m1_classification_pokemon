@@ -7,7 +7,7 @@ output:
 <style>body {text-align: justify}</style>
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 
 ```
 
@@ -49,9 +49,8 @@ Les valeurs des dommages sont égales à 0, 0.5, 1 ou 2.
 
 Dans un second temps, nous allons expliquer notre compréhension du jeu de données. Et montrer comment nous l'avons nettoyé.  
 
-```{r library, eval=TRUE, include=TRUE, results='hide', class.source = 'foldable'}
+```{r libraries,  results='hide', include=FALSE}
 ### Librairies
-
 # definition des librairies dont on a besoin
 load_lib <- c("tidyverse", "kableExtra", "FactoMineR", "factoextra", "cowplot")
 # packages necessaires qui ne sont pas installes
@@ -62,25 +61,21 @@ for (lib in install_lib) install.packages(lib,dependencies=TRUE)
 sapply(load_lib,require,character=TRUE)
 ```
 
-```{r data, eval=TRUE, include=TRUE, results='hide'}
+```{r data, eval=TRUE, include=F, results='hide'}
 ### Importation des donnees et choix des colonnes
-
 ## on importe les donneess
 pokemon <- read_delim(file="pokedex.csv", delim = ",", col_names = TRUE)
 # resume statistique
 summary(pokemon)
-
 ## on regarde s'il y a des donnees manquantes
 # pour chaque colonne
 pokemon %>% summarise_all(~ sum(is.na(.))) 
 # au total
 pokemon %>% map_df(~sum(is.na(.))) %>% rowSums() # 2448 
-
 ## on regarde le nombre de pokemon "doublons" (numero de pokedex)
 sum(duplicated(pokemon[,"pokedex_number"])) # 147 doublons
 ## on enleve les doublons
 pokemon2 <- pokemon %>% distinct(pokedex_number, .keep_all = TRUE) # on enleve les Mega et garde uniquement les formes de bases des pokemon (pas les evolutions)
-
 ## suppression de certaines colonnes
 pokemon2 <- pokemon2 %>% select(-c("...1",german_name, japanese_name, species, catch_rate, base_friendship, base_experience, growth_rate, egg_type_number, egg_type_1, egg_type_2, egg_cycles, abilities_number, ability_1, ability_2, ability_hidden, total_points))
 ```
@@ -104,23 +99,55 @@ Nous avons donc conservé 34 colonnes.
 Enfin, nous avons fait une exploration des données à l'aide de quelques statistiques descriptives.  
 
 Le tableau ci-dessous montre le nombre de Pokémon par génération :
-```{r echo=TRUE, results='asis'}
+
+
+
+
+
+```{r}
 ## Afficher le nombre de pokemons par generation
 # on cree un tableau avec le nombre de pokemons par generation 
 # nb_pokemon_gen <- pokemon2 %>% count(generation)  
 # on affiche la table obtenue
 knitr::kable(pokemon2 %>% count(generation) ) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
+
 Nous remarquons que c'est la cinquième génération qui comporte le plus de Pokémon. 
 Il y en a 156.  
 
 Le graphique ci-dessous représente la variable *type_1* de Pokémon :
+
 ```{r}
 ggplot(pokemon2) + aes(x=reorder(type_1,type_1, function(x)-length(x)), fill=type_1) + geom_bar() + ggtitle("Représentation des types 1 de pokemons") +  xlab("Type 1") + ylab("Nombre de types") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+
 Le type *Water* est le plus repésenté puisque quasiment 125 créatures incarnent ce type.
 
 # 2. Classification des individus
+## 2.1. ACP
+
+
+
+Avant de commencer la classification, nous allons réaliser une Analyse Factorielle Composantes Multiples. L’analyse des données nous apporte une première interprétation et intuition. Nous souhaitons voir si les Pokémon se distinguent bien par leurs types ou leurs caractéristiques.
+
+Pour réaliser cette AFCM, nous sélectionnons les variables qualitatives du jeu de données : *status* , *type_1* et *type_2*. 
+
+
+Nous représentons le diagramme en barre des pourcentages d’inertie de chaque axe et nous décidons de garder tous les axes pour ne pas perdre d’information pour la classification. Nous récupérons les scores des individus selon les axes.
+
+Nous affichons maintenant la représentation barycentrique des axes. 
+
+
+## 2.2. CAH
+
+
+
+
+## 2.3. Kmeans
+
+
+## 2.4. Choix de la classification
 
 Utilisation des algorithmes de classification vus en cours
 - Notions de proximité pour certaines variables (variables Type ou variables against X)
