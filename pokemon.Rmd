@@ -1,5 +1,5 @@
 ---
-title: "Pokemon"
+title: "Pokémon"
 author: "FLOCH Elisa, GOUTARD Amélie et MARMION Violette"
 date: '2022-04-01'
 output: html_document
@@ -23,7 +23,7 @@ sapply(load_lib,require,character=TRUE)
 
 ## Importation des donnéees et choix des colonnes
 ```{r data, eval=TRUE, include=TRUE}
-## on importe les donneess
+## on importe les donnees
 pokemon <- read_delim(file="pokedex.csv", delim = ",", col_names = TRUE)
 # resume statistique
 summary(pokemon)
@@ -31,7 +31,7 @@ summary(pokemon)
 ## on regarde s'il y a des donnees manquantes
 # pour chaque colonne
 pokemon %>% summarise_all(~ sum(is.na(.))) 
-# 492 pour colonne type_2 : normal, tous les pokemons n'ont pas 2 types
+# 492 pour colonne type_2 : normal, tous les Pokemons n'ont pas 2 types
 # 1 pour colonne weight_kg : pokemon 1033 Eternatus Eternamax
 # 3 pour colonne ability_1 : ok
 # 529 pour colonne ability_2 : ok
@@ -48,7 +48,7 @@ pokemon %>% summarise_all(~ sum(is.na(.)))
 # au total
 pokemon %>% map_df(~sum(is.na(.))) %>% rowSums() # 2448 
 
-## on regarde le nombre de pokemon "doublons" (numero de pokedex)
+## on regarde le nombre de Pokemon "doublons" (numero de pokedex)
 sum(duplicated(pokemon[,"pokedex_number"])) # 147 doublons
 ## on enleve les doublons
 pokemon2 <- pokemon %>% distinct(pokedex_number, .keep_all = TRUE) # on enleve les Mega et garde uniquement les formes de bases des pokemon (pas les evolutions)
@@ -60,49 +60,49 @@ pokemon2 <- pokemon2 %>% select(-c("...1",german_name, japanese_name, species, c
 
 ## Exploration des données
 ```{r}
-## Afficher le nombre de pokemons par generation
-# on cree un tableau avec le nombre de pokemons par generation 
+## Afficher le nombre de Pokemon par generation
+# on cree un tableau avec le nombre de Pokemon par generation 
 # nb_pokemon_gen <- pokemon2 %>% count(generation)  
 # on affiche la table obtenue
 knitr::kable(pokemon2 %>% count(generation) ) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 
-## Afficher le nombre de pokemons par status
-# on cree un tableau avec le nombre de pokemons par generation 
+## Afficher le nombre de Pokemon par status
+# on cree un tableau avec le nombre de Pokemon par generation 
 # nb_pokemon_status <- pokemon2 %>% count(status)  
 # on affiche la table obtenue
 knitr::kable(pokemon2 %>% count(status) ) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 
-## Reprentation des types(1) de pokemons
+## Reprentation des types_1 de Pokemon
 # pour chaque type_1, on compte le nombre de fois qu'il apparait dans la bdd
 # pokemon_type_1 <- pokemon2 %>% count(type_1) %>% arrange(desc(n))
-# representation graphique des genres dans le top
+# representation graphique des Pokemon par type_1
 ggplot(pokemon2) + aes(x=reorder(type_1,type_1, function(x)-length(x)), fill=type_1) + geom_bar() + ggtitle("Représentation des types 1 de pokemons") +  xlab("Type 1") + ylab("Nombre de types") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-## Reprentation des types(2) de pokemons
+## Reprentation des types(2) de Pokemon
 # pour chaque type_2, on compte le nombre de fois qu'il apparait dans la bdd
 # pokemon_type_2 <- pokemon2 %>% count(type_2) %>% arrange(desc(n))
-# representation graphique des genres dans le top
-ggplot(pokemon2) + aes(x=reorder(type_2,type_2, function(x)-length(x)), fill=type_2) + geom_bar() + ggtitle("Représentation des types 2 de pokemons") +  xlab("Type 2") + ylab("Nombre de types") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
-# on peut voir que 492 pokemons n'ont pas second type
+# representation graphique des Pokemon par type_2
+ggplot(pokemon2) + aes(x=reorder(type_2,type_2, function(x)-length(x)), fill=type_2) + geom_bar() + ggtitle("Représentation des types 2 de Pokemon") +  xlab("Type 2") + ylab("Nombre de types") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# on peut voir que 492 Pokemon n'ont pas second type
 
-## Boxplot de la taille des pokemons
-ggplot(pokemon2) + aes(x = "", y=height_m, color=height_m) + geom_boxplot(fill="pink") + ggtitle("Boxplot de la taille des pokemon") +  xlab("") + ylab("Taille en mètre")
+## Boxplot de la taille des Pokemon
+ggplot(pokemon2) + aes(x = "", y=height_m, color=height_m) + geom_boxplot(fill="pink") + ggtitle("Boxplot de la taille des Pokemon") +  xlab("") + ylab("Taille en mètre")
 
-## Boxplot du poids des pokemons
+## Boxplot du poids des Pokemon
 ggplot(pokemon2) + aes(x = "", y=weight_kg) + geom_boxplot(fill="pink") + ggtitle("Boxplot du poids des pokemon") +  xlab("") + ylab("Poids en kg")
 ```
 
 
 ## Analyse en Composante Principales   
-On cherche à voir si, à partir des statistiques à disposition et qu'on a gardé, on peut regrouper les pokemons par type. En combien de types différents ?  
-On sait que dans le jeu, un pokémon a obligatoirement 1 type, mais peut également avoir 2 types. 
-Il y a 18 types possibles, parmis les suivants :  
+On cherche à voir si, à partir des statistiques à disposition et qu'on a gardé, on peut regrouper les Pokemon par type. En combien de types différents ?  
+On sait que dans le jeu, un Pokemon a obligatoirement 1 type, mais peut également avoir 2 types. 
+Il y a 18 types possibles, parmi les suivants :  
 Grass, Fire, Water, Bug, Normal, Poison, Electric, Ground, Fairy, Fighting, Psychic, Rock, Ghost,
 Ice, Dragon, Dark, Steel, Flying  
 
-Nous cherchons donc dans un premier temps à représenter les individus (=les pokemons) et à voir graphiquement par une ACP si des "groupes" se distinguent (i.e si certains individus sont plus proches par rapport aux statistiques que d'autres).  
+Nous cherchons donc dans un premier temps à représenter les individus (les pokemons) et à voir graphiquement par une ACP si des "groupes" se distinguent (i.e si certains individus sont plus proches par rapport aux statistiques que d'autres).  
 
-Ensuite, nous chercherons à confirmer (ou non) notre intuition par une classification. Nous essayerons de retrouver les types et donc de faire comme si nous n'avions pas cette information. L'objectif étant de bien prédire le type d'un pokémon lorsqu'on en rencontre un nouveau (= n'existant pas dans la base de donnnées).
+Ensuite, nous chercherons à confirmer (ou non) notre intuition par une classification. Nous essayerons de retrouver les types et donc de faire comme si nous n'avions pas cette information. L'objectif étant de bien prédire le type d'un Pokemon lorsqu'on en rencontre un nouveau (= n'existant pas dans la base de donnnées).
 
 Nous avons vu dans les statistiques descriptives que les variables ne sont pas pas toutes mesurées dans la même unité, on standardisera donc les données. 
 
@@ -120,7 +120,7 @@ pokemon3$status <- as.numeric(pokemon3$status)
 
 On se focalise d'abord sur les pokemon n'ayant qu'un seul type uniquement. 
 ```{r}
-### on garde uniquement les pokemon qui n'ont qu'un seul type
+### on garde uniquement les Pokemon qui n'ont qu'un seul type
 pokemon_type1 <- pokemon3 %>% 
   filter(type_number == 1) %>%
   select(-c(pokedex_number,type_2, type_number, percentage_male))
@@ -132,7 +132,7 @@ acp_pokemonType1 <- PCA(X = select(pokemon_type1,-name), scale.unit=TRUE, quali.
 
 ### inertie
 fviz_screeplot(acp_pokemonType1) 
-# d'apres le graphique, on peut aller regarder jusqu'a 4 dimension
+# d'apres le graphique, on peut aller regarder jusqu'a 4 dimensions
 
 ### on represente graphiquement
 ## dimension 1 et 2
@@ -169,7 +169,7 @@ ind = fviz_pca_ind (acp_pokemonType1,
               # ellipse.type = "confidence", # ellipse de confiance
               repel = TRUE) # evite le chevauchement de texte
 plot_grid(ind,var, ncol=2, nrow=1)
-# 3 voire 4 "groupes" semblent se disntguer : un pour le type Fighting, un autre pour (Psychic,Ghost), un pour Grass et tous les autres types ensemble
+# 3 voire 4 "groupes" semblent se distinguer : un pour le type Fighting, un autre pour (Psychic,Ghost), un pour Grass et tous les autres types ensemble
 
 ## dim 1 et 4
 # les variables
@@ -193,9 +193,9 @@ plot_grid(ind,var, ncol=2, nrow=1)
 
 ```
 
-On considère maintenant tous les pokémons (type 1 et 2). Pour cela, on regroupe les colonnes "type_1" et "type_2" en une seule, intitulée "type". On a donc 177 types possible pour chaque pokémon. 
+On considère maintenant tous les Pokemon (type 1 et 2). Pour cela, on regroupe les colonnes "type_1" et "type_2" en une seule, intitulée "type". On a donc 177 types possible pour chaque Pokemon. 
 ```{r}
-### on regroupe les colonnes type_1 et type_2 en une intutule type
+### on regroupe les colonnes type_1 et type_2 en une intitule type
 pokemon_type12 <- pokemon3 %>% 
   unite("type",type_1:type_2, na.rm=TRUE, remove=FALSE) %>% 
   select(-c(pokedex_number,type_1, type_2, type_number, percentage_male))
@@ -209,19 +209,19 @@ acp_pokemonType12 <- PCA(X = select(pokemon_type12,-name), scale.unit=TRUE, qual
 
 ### inertie
 fviz_screeplot(acp_pokemonType12) 
-# d'apres le graphique, on peut aller regarder jusqu'a 4 dimension
+# d'apres le graphique, on peut aller regarder jusqu'a 4 dimensions
 
 ### on represente graphiquement
 var <- plot(acp_pokemonType12,choix="var")
 ind <- plot(acp_pokemonType12,choix="ind") # avec les individus supplementaires
 plot_grid(ind,var, ncol=2, nrow=1)
-# on ne peut certes pas lire clairement les types etant donne qu'il y en a 177, mais 5 groupes semblent se distinguer :
+# on ne peut pas lire clairement les types etant donne qu'il y en a 177, mais 5 groupes semblent se distinguer :
 # un groupe en haut a gauche, un en haut a droite, un en haut a droite, un plutot vers le bas a gauche (mais assez proche du centre), puis 2 en bas a droite
 # 
 
 ```
 
-CHOIX : on aurait tendance a choisir de regrouper type_1 et type_2 en une seule colonne car la séparation en groupe semble plus claire suite à l'ACP qu'avec uniquement le type 1. De plus, on garde ainsi tous nos pokémons. 
+CHOIX : on aurait tendance a choisir de regrouper type_1 et type_2 en une seule colonne car la séparation en groupe semble plus claire suite à l'ACP qu'avec uniquement le type 1. De plus, on garde ainsi tous nos Pokemon. 
 
 
 ## Classification
@@ -261,7 +261,7 @@ dend %>% set("branches_k_color", k = K) %>% set("labels_color",k=K) %>% set("lab
 ## on compare les groupes avec les types
 pokemon_cah$groupe = as.factor(gpe.ward)
 table(pokemon_cah$groupe,pokemon3$type_1)
-# d'apres nos connaissances en pokemon, les groupes ne sont pas si mal mais peut-etre que nous pouvns faire mieux avec plus de classes, sans doute en allant jusqu'a 5 ou 6 classes
+# d'apres nos connaissances en Pokemon, les groupes ne sont pas si mal mais peut-etre que nous pouvons faire mieux avec plus de classes, sans doute en allant jusqu'a 5 ou 6 classes
 
 ## representation des groupes sur les axes factoriels
 acp_cah <- PCA(X = select(pokemon_cah,-c(name,type)), scale.unit=TRUE, quali.sup=29, graph=FALSE)
@@ -294,7 +294,7 @@ ind2 <- plot(acp,choix="ind", habillage = 29, autoLab="no")
 plot_grid(ind2,var2, ncol=2, nrow=1)
 
 ```
-Pour 3 groupes : les classes 2 et 3 sont bien distinctes, la classe 1 l'est gloabelement mais un peu plus mélangée avec les classes 2 et 3.  
+Pour 3 groupes : les classes 2 et 3 sont bien distinctes, la classe 1 l'est globalement mais un peu plus mélangée avec les classes 2 et 3.  
 Pour 4 groupes : on retrouve ici 2 classes bien distinctes (4 et 2) tandis que les classes 1 et 3 sont plus mélangées.  
 Pour 5 groupes : toujours 2 classes bien distinctes (5 et 3) mais les 3 autres classes sont moins évidente. La classe 1 se distingue un peu plus de la classe 5 que les classes 2 et 4.  
 Pour 6 groupes : on remarque 3 classes distinctes (3, 5 et 6), correspondant bien au graphique des variables (3 groupes de fleches allant dans 3 directions différentes). la classe 1 se distingue aussi un peu des classes 3,5 et 6 mais reste mélangée aux classes 4, 2 et 3.  
@@ -354,20 +354,20 @@ plot_grid(ind_cah, var_cah, ind_kmeans, var_kmeans, ncol=2, nrow=2)
 # tableau de contingence pour la cah
 table_cont_cah <- table(pokemon_cah$groupe,pokemon3$type_1) %>% as.data.frame() %>% as_tibble() %>% rename(Classe_cah = Var1, Type1 = Var2, Freq_cah = Freq)
 table_cont_cah %>% group_by(Classe_cah,Type1) %>% summarise(nb = Freq_cah)
-# tableau de contingence pour Kmeans
+# tableau de contingence pour K-means
 table_cont_kmeans <- table(pokemon_kmeans$groupe,pokemon3$type_1) %>% as.data.frame() %>% as_tibble() %>% rename(Classe_kmeans = Var1, Type1 = Var2, Freq_kmeans = Freq)
 # jointure des tables pour comparer
 table_cont_cah %>% inner_join(table_cont_kmeans) %>% View()
 
 ```
-CHOIX : Pour chacune des 2 méthodes, on a compté pour chaque classe le nombre de pokémon par "type_1". (on perd forcément en précision en regardant que pour type_1 mais ça donne déjà une idée de la "justesse" des méthodes).  
-Ensuite, nous avons regardé les types de pokémon les plus présent par classe. D'après nos connaissances Pokémon, les classes issues de la Kmeans nous semblent les plus cohérentes. En effet, le groupe 1 correspondrait (à priori) aux pokémons ayant de grosse résistance ou pouvant annuler des attaques (ghost). Le groupe 2 aux pokémon ayant des grosse statistiques en attaque spéciales. Enfin, le groupe 3 les pokémons ayant de grosses faiblesses mais des attaques plus fortes. 
+CHOIX : Pour chacune des 2 méthodes, on a compté pour chaque classe le nombre de Pokemon par "type_1". (on perd forcément en précision en regardant que pour type_1 mais ça donne déjà une idée de la "justesse" des méthodes).  
+Ensuite, nous avons regardé les types de Pokemon les plus présent par classe. D'après nos connaissances Pokémon, les classes issues de la K-means nous semblent les plus cohérentes. En effet, le groupe 1 correspondrait (à priori) aux Pokemon ayant de grosse résistance ou pouvant annuler des attaques (ghost). Le groupe 2 aux Pokemon ayant des grosses statistiques en attaque spéciale. Enfin, le groupe 3 les Pokemon ayant de grosses faiblesses mais des attaques plus fortes. 
 A l'inverse, les groupes issues de la CAH ne sont pas vraiment cohérents ... Le groupe 1 semble être un groupe un peu "fourre tout", le groupe 2 composé presque uniquement de type Fairy et Grass et le groupe 3 rassemble les types Ghost et Steel ensemble qui sont pourtant opposé.  
-Finalement, les groupes issues de la Kmeans sont graphiquement ceux qu'on aurait choisi (représentation sur les axes factorielles) et sont également les plus cohérents vis-à-vis de nos connaissances et de la documentation sur les caractéristiques des types (plus de détails [ici](https://www.crumpe.com/2021/10/chaque-type-de-pokemon-classe-du-plus-nul-au-plus-fort/)).  
+Finalement, les groupes issues de la K-means sont graphiquement ceux qu'on aurait choisi (représentation sur les axes factorielles) et sont également les plus cohérents vis-à-vis de nos connaissances et de la documentation sur les caractéristiques des types (plus de détails [ici](https://www.crumpe.com/2021/10/chaque-type-de-pokemon-classe-du-plus-nul-au-plus-fort/)).  
 
 
 ## Etude des groupes obtenus  
-Suite au choix de la méthode Kmeans, on peut étudier les groupes obtenus.   
+Suite au choix de la méthode K-means, on peut étudier les groupes obtenus.   
 ```{r}
 ## on veut regarder pour chaque groupe, les 'types_1' les plus representes
 # on recupere le nombre de pokemon par type_1
@@ -451,10 +451,6 @@ D'après le résumé statistique :
              assez faible face aux types Flying, Rock
 
 
-CONCLUSION : Les 3 groupes obtenus avec les Kmeans nous semblent cohérents. En effet, les statistiques par classes rejoignent bien nos intuitions et connaissances sur les Pokémons ainsi que la documentation sur les 18 types de pokémons. 
-
-Cependant, il ne faut pas oublier que nos résultats découlent de nos choix antérieurs, à savoir :
-- le choix de ne pas traiter les variables concernant les groupes d'oeufs, l'espèce, l'habilité, le taux de capture, le lien affectif, l'expérience de base du pokémon, la catégorie de la courbe d'expérience (= points d'expériences nécessaires pour gagner des niveaux) et le pourcentage de mâle. 
-- le pourcentage de mâle est une variable qui aurait sans doute été intéréssante à prendre en compte (par exemple : pokemon fée (Fairy) plutôt femelle, pokemon roche (Rock) et combat (Fighting) plutôt mâle, certains type uniquement asexué). Cette variable prend des NA lorsque le pokémon est asexué, 100 si mâle et 0 si femelle. Pour pouvoir l'intégrer à notre analyse, il aurait fallu prendre en compte les NA comme une catégorie à part entière. Une possibilité aurait été de transformer la variable en variable qualitative (par exemple si >60 alors mâle, si <60 femelle et si NA alors asexué). Mais en procédant de la sorte, nous perdons de l'information.  
+CONCLUSION : Les 3 groupes obtenus avec les K-means nous semblent cohérents. En effet, les statistiques par classes rejoignent bien nos intuitions et connaissances sur les Pokémon ainsi que la documentation sur les 18 types de Pokémon. 
 
 
