@@ -20,28 +20,21 @@ Dans un premier temps, nous allons présenter la base de données ainsi que le s
 
 Le jeu de données concerne l’univers des Pokémon.
 La franchise a été créée en 1996.
-Elle est exploitee sous forme de jeux vidéos, mangas,   dessins animés, jeux de cartes ou jeux en réalité augmentée
-Le principe du jeu repose sur la capture, le dressage et les combats de créatures “animales” imaginaires appelées Pokémon et possédant chacun leur caractéristiques propres.  
+Elle est exploitée sous forme de jeux vidéos, mangas, dessins animés, jeux de cartes ou jeux en réalité augmentée. Le principe du jeu repose sur la capture, le dressage et les combats de créatures “animales” imaginaires appelées Pokémon et possédant chacun leurs caractéristiques propres.  
 
-Le jeu de données proposé contient différentes informations et statistiques concernant chacun des Pokémon de la première à la huitèime génération (environ 890 individus).  
+Le jeu de données proposé contient différentes informations et statistiques concernant chacun des Pokémon de la première à la huitième génération.  
 
-Les liens suivants ont été utiles pour la réalisation de notre projet :  
-- Pokédia : [le *wikipedia des Pokémon*](https://www.pokepedia.fr/)   
-- Pokédex : [la *base de données des Pokémon*](https://www.pokebip.com/pokedex)
 
 La base de données initiale contenait 1045 lignes et 51 colonnes.
-Une ligne correspond à un Pokémon identifié, uniquement, par son nom et par son numéro dans la base des données des Pokéemon, le Pokédex (non unique). 
-Certains individus apparaissent plusieurs fois car ils ont plusieurs formes ou une évolution supplémentaire dite “méga”.
-Nous avons décidé de conserver une unique forme pour chacun.
+Une ligne correspond à un Pokémon identifié, uniquement, par son nom et par son numéro dans la base des données des Pokémon, le Pokédex (non unique). 
+Certains individus apparaissent plusieurs fois car ils ont plusieurs formes ou une évolution supplémentaire dite “Méga”.
 Les variables représentent les caractéristiques nominales telles que le nom (en anglais, en allemand et en japonais), le numéro d’identification, le statut (normal, légendaire, etc), la génération et l'espèce. 
 Mais aussi le type de la créature.
 Les Pokémon ont 1 ou 2 types parmi les 18 types existants : Grass, Fire, Water, Bug, Normal, Poison, Electric, Ground, Fairy, Fighting, Psychic, Rock, Ghost, Ice, Dragon, Dark, Steel et Flying. 
 
 Des caractéristiques quantitaves sont aussi présentes.
-Nous retrouvons la taille, le poids, les points de vie, d'attaque, de défense, de vitesse, etc.
-Ensuite, il y a des caractéristiques de dressage, par exemple : le taux de capture.
-Enfin, les dommages reçus contre un certain type.
-Les valeurs des dommages sont égales à 0, 0.5, 1 ou 2.  
+Nous retrouvons la taille, le poids, les points de vie, d'attaque, de défense, de vitesse, des caractéristiques de dressage et les dommages reçus contre un certain type.
+Les valeurs des dommages sont égales à 0, 0.5, 1, 2 ou 4.  
 
 
 Dans un second temps, nous allons expliquer notre compréhension du jeu de données et montrer comment nous l'avons nettoyé.  
@@ -79,19 +72,21 @@ pokemon2 <- pokemon2 %>% select(-c("...1",german_name, japanese_name, species, c
 
 Après avoir importé les données, nous regardons s'il y a des données manquantes.
 Par exemple, dans la colonne *type_2*, nous constatons qu'il y a 492 données manquantes.
-Ce qui semble normal puisque tous les pokemons n'ont pas 2 types.
+Ce qui semble normal puisque tous les Pokémon n'ont pas 2 types.
 Autre exemple, la colonne *percentage_male* comporte 173 données manquantes.
+Celles-ci correspondent aux Pokémon asexués.
 Au total, nous obtenons 2448 données manquantes.  
 
 Ensuite, nous avons regardé le nombre de Pokémon qui étaient en doublons, en fonction du numéro de Pokédex.
-Nous avons obtenu 147 doublons que nous avons immédiatement supprimés.
-Suite à cela, nous avons enlevé les individus ayant une évolution supplémentaire dite “méga”.
-Notre base est désormais uniquement constituée des Pokémon ayant une forme classique (la forme de base).
+Nous avons obtenu 147 doublons.
+Nous avons conservé la forme de base et supprimé les formes Méga de chaque Pokémon.
 Nous obtenons donc une base contenant 898 individus.  
 
-Puis, nous avons décidé de supprimer des colonnes, selon nous, inutiles à notre analyse.
-Telles que *german_name*, *japanese_name*, *catch_rate*, etc.
-Nous avons donc conservé 34 colonnes.  
+Puis, nous avons décidé de supprimer ces colonnes, selon nous, inutiles à notre analyse : 
+*german_name*, *japanese_name*, *species*, *catch_rate*, *base_friendship*, *base_experience*, *growth_rate*, *egg_type_number*, *egg_type_1*, *egg_type_2*, *egg_cycles*, *abilities_number*, *ability_1*, *ability_2*, *ability_hidden*, *total_points*.
+
+Une espèce est constituée d'un Pokémon et de ses évolutions. Ayant supprimé les évolutions de chaque Pokémon, nous avons jugé que cette variable *species* n'était pas interéssante. La variable *catch_rate* donne le niveau de rareté de capture d'un Pokémon. Afin de ne pas être redondant, nous avons décidé de garder uniquement comme caractéristique de rareté la variable *status*. Il n'était pas interéssant de garder l'amabilité d'un Pokémon donc nous avons supprimé la colonne *base_friendship*. Les variables *base_experience* et *growth_rate* déterminent le niveau et les points d'expérience des Pokémon. Ces variables ne sont comparables car les niveaux sont propres à chaque Pokémon. Les variables abilities donnent le talent de chaque Pokémon, toutefois deux Pokémon identiques peuvent avoir des talents différents donc ce n'est pas une caractéristique d'un type de Pokémon. L'oeuf n'étant pas un Pokémon, nous avons décidé de supprimer les colonnes *egg*. La colonne *total_points* a été supprimée car étant la somme des variables *hp*, *attack*, *defense*, *sp_attack*, *sp_defense* et *speed* cette variable est redondante. Nous avons donc conservé 34 colonnes.
+
 
 Ensuite, nous avons transformé la variable qualitative *status* en variable quantitative en lui attribuant les valeurs 1 pour Normal, 2 pour Sub Legendary, 3 pour Legendary et 4 pour Mythical.
 
@@ -106,44 +101,23 @@ levels(pokemon3$status) # du moins rare au plus rare
 pokemon3$status <- as.numeric(pokemon3$status)
 ```
 
-Enfin, nous avons fait une exploration des données à l'aide de quelques statistiques descriptives.  
-
-Le tableau ci-dessous montre le nombre de Pokémon par génération :
-
-
-
-
-
-
-
-
-
-```{r}
-## Afficher le nombre de pokemons par generation
-# on cree un tableau avec le nombre de pokemons par generation 
-# nb_pokemon_gen <- pokemon2 %>% count(generation)  
-# on affiche la table obtenue
-knitr::kable(pokemon2 %>% count(generation) ) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
-```
-
-Nous remarquons que c'est la cinquième génération qui comporte le plus de Pokémon. 
-Il y en a 156.  
+Enfin, nous avons fait une exploration des données à l'aide de quelques statistiques descriptives.
 
 Le graphique ci-dessous représente la variable *type_1* de Pokémon :
 
 ```{r, out.width="70%", fig.align="center"}
-ggplot(pokemon2) + aes(x=reorder(type_1,type_1, function(x)-length(x)), fill=type_1) + geom_bar() + ggtitle("Représentation des types 1 de pokemons") +  xlab("Type 1") + ylab("Nombre de types") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggplot(pokemon2) + aes(x=reorder(type_1,type_1, function(x)-length(x)), fill=type_1) + geom_bar() + ggtitle("Représentation des types 1 de Pokémon") +  xlab("Type 1") + ylab("Nombre de types") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
-
 
 Le type *Water* est le plus repésenté puisque quasiment 125 créatures incarnent ce type.
 
 # 2. Classification des individus
+
 ## 2.1. ACP
 
 Avant de commencer la classification, nous allons réaliser une Analyse en Composantes Principales. L’analyse des données nous apporte une première interprétation et intuition. A partir des statistiques, nous cherchons à voir si nous pouvons regrouper les Pokémon par leurs types. Nous cherchons donc à représenter les individus, les Pokémon, et à voir graphiquement par une ACP si des groupes se forment, soit si certains individus ont des caractéristiques communes.  
 
-Ensuite, nous chercherons à vérifier notre intuition par une classification. L’objectif de notre classification est de prédire le type d'un Pokémon lorsqu'on en rencontre.
+Ensuite, nous chercherons à vérifier notre intuition par une classification. L’objectif de notre classification est de prédire le type d'un Pokémon lorsqu'on en rencontre un nouveau.
 
 Tout d'abord, nous nous focalisons sur les Pokémon ayant un seul type pour l'ACP. Nous standardisons les données car elles n'ont pas toutes la même unité.
 
@@ -185,9 +159,9 @@ plot_grid(ind,var, ncol=2, nrow=1)
 Nous remarquons que 3 groupes semblent se distinguer. Le premier groupe contient les Pokémon de type Fighting, le second groupe contient les Pokémon de types Psychic et Ghost et enfin le dernier regroupe tous les types restants.
 
 
-Nous réalisons désormais l'ACP avec tous les Pokémons. Pour cela, nous regroupons les colonnes *type_1* et *type_2"* dans la colonne *type*. Cette colonne recense alors 177 types. 
+Nous réalisons désormais l'ACP avec tous les Pokémon. Pour cela, nous regroupons les colonnes *type_1* et *type_2* dans la colonne *type*. Cette colonne recense alors 177 types. 
 
-Nous calculons l'ACP sur les données standardisées. Nous choisissons de représenter les individus et les variables sur les axes 1 et 2 car c'est le plan qui distingue au mieux les individus.
+Nous calculons l'ACP sur les données standardisées.Nous choisissons de représenter les individus et les variables sur les axes 1 et 2 car c'est le plan qui distingue au mieux les individus.
 ```{r , results='hide', include=FALSE}
 ### on regroupe les colonnes type_1 et type_2 en une intutule type
 pokemon_type12 <- pokemon3 %>% 
@@ -212,12 +186,12 @@ ind <- plot(acp_pokemonType12,choix="ind") # avec les individus supplementaires
 plot_grid(ind,var, ncol=2, nrow=1)
 ```
 
-Il est difficile de lire clairement les types étant donnée qu'il y en a 177 mais 4 voire 5 groupes semblent se distinguer. 
+Il est difficile de lire clairement les types étant donné qu'il y en a 177 mais 4 voire 5 groupes semblent se distinguer. 
 
-_Conclusion de l'ACP :_  on aurait tendance a préférer le regroupement de type_1 et type_2 car les groupes semblent plus distincts. Cependant, nous allons garder uniquement la colonne *type_1* afin de conserver tous les Pokémon.
+_Conclusion de l'ACP :_  on aurait tendance à préférer le regroupement de type_1 et type_2 car les groupes semblent plus distincts.
 
 ## 2.2. CAH
-Le but est de créer une suite de partitions emboîtées : en n classes, puis en n-1 classes, etc jusqu’a obtenir une unique classe.
+Le but est de créer une suite de partitions emboîtées : en n classes, puis en n-1 classes, etc jusqu’à obtenir une unique classe.
 Nous allons donc choisir le nombre de groupes le plus pertinent à la fin (par comparaison des partitions créées).  
 
 Les caractéristiques de la Classification Ascendante Hiérarchique sont :  
@@ -228,17 +202,16 @@ Le principe de cette méthode est de partir de la classification la plus fine : 
 Pour appliquer cet algorithme, nous voyons qu’il nous faut :  
 - Définir une distance ou dissimilarité entre individus  		
 - Définir une distance entre classes : pour le recalcul des distances à l’issue de chaque étape  
-On parle alors de stratégie d'agrégation  
 
 Après avoir standardisé les données, nous avons calculé la distance euclidienne.
 Pour effectuer la CAH, nous avons utilisé la distance de Ward.
 Cette distance nécessite de disposer des distances euclidiennes (pour que la notion de barycentre comme centre du nuage de points ait un sens).
 Elle tend à créer des groupes sphériques et de tailles similaires.
-Et elle est sensible à la présence de points outliers.
+Elle est sensible à la présence de points outliers.
 C'est le critère le plus utilisé.
 À chaque étape, nous créons de nouvelles classes en agrégeant les classes (pouvant être réduites à un seul individu) les plus proches.
 À posteriori, on choisit le nombre de groupes le plus adapté.
-En regardant la  courbe d'inertie des 20 premières valeurs, nous hésitons entre 3, 5 et 6 groupes. 
+En regardant le tracé de la perte d'inertie, nous hésitons entre 3, 5 et 6 groupes. 
 Le choix n'étant pas très naturel, nous décidons de tester les 3 cas et ainsi de choisir ce qui nous semble le plus convenable.  
 
 Commençons par faire une partition en 3 groupes.
@@ -284,61 +257,64 @@ Enfin, nous avons testé notre modèle pour différentes valeurs de K.
 
 Ainsi, avec une CAH, nous décidons de conserver 3 classes. 
 Ce choix n’a pas été très évident mais c’est celui qui nous semble le plus raisonnable. 
-Regardons dans la partie suivante si notre choix se confirme avec les kmeans.  
+Regardons dans la partie suivante si notre choix se confirme avec les K-means.  
 
 
-## 2.3. Kmeans
+## 2.3. K-means
 
-La méthode k-means vise à diviser les points en k groupes, de sorte à ce que la somme des carrés des points au centre du cluster soit minimisée. 
-C'est l'ensemble de points de données qui sont les plus proches du centre de grappes.  
+Nous allons consolider les résultats de la CAH en utilisant l'algorithme de K-means.
+Cela va permettre la réallocation d'individus qui auraient été "mal" classés durant la CAH.
 
 Nous avons commencé par une partition en 3 groupes.
-Pour cela, nous avons fait une représentation des groupes issus des kmeans sur le premier plan factoriel.
+Pour cela, nous avons fait une représentation des groupes issus des K-means sur le premier plan factoriel.
+
+```{r, warning=F, out.width="70%", fig.align="center"}
+### partition en 3 groupes 
+pokemon_kmeans <- pokemon_type12
+## K-means
+K = 3
+cl = kmeans(pokemon.sc,K,nstart=50)
+## creation des classes
+gpe <- cl$cluster
+pokemon_kmeans$groupe <- as.factor(gpe)
+## representation des groupes sur le premier plan factoriel
+acp_kmeans <- PCA(X = select(pokemon_kmeans,-c(name,type)), scale.unit=TRUE, quali.sup=29, graph=FALSE)
+var_kmeans <- plot(acp_kmeans,choix="var")
+ind_kmeans <- plot(acp_kmeans,choix="ind", habillage = 29, autoLab="no")
+plot_grid(ind_kmeans,var_kmeans, ncol=2, nrow=1) 
+
+```
+
+
 Nous constatons que les 3 classes sont distinctes, peut être même plus qu'avec la CAH.
 Puis, nous avons testé notre modèle pour différentes valeurs de K.  
 
-Ainsi, avec la méthode des kmeans, nous décidons de conserver 3 classes. 
+
+Ainsi, avec la méthode des K-means, nous décidons de conserver 3 classes. 
 Notre choix est rassurant puisque le nombre de classes que nous avons gardé est le même avec les deux méthodes.
 Cependant, les groupes sont différents selon la méthode utilisée. 
 Nous allons donc les comparer afin d'en retenir une seule.  
 
+
+
+
 ## 2.4. Choix de la classification
 
 Dans cette dernière partie, nous allons décider d'une classification finale.
-Pour cela, nous allons comparer les résultats de CAH et de Kmeans :
+Pour cela, nous allons comparer les résultats de CAH et de K-means Pour rappel, voici la représentation des groupes sur le plan des axes 1 et 2 de la CAH et des K-means, respectivement.
 
-```{r, warning=F,out.width="70%", fig.align="center"}
-#### CAH
-# partition en 3 groupes
-pokemon_cah <- pokemon_type12
-# creation des classes
-K=3
-gpe.ward = cutree(cah.ward,k=K)
-# on compare les groupes avec les types
-pokemon_cah$groupe = as.factor(gpe.ward)
-# representation des groupes sur les axes factoriels
-acp_cah <- PCA(X = select(pokemon_cah,-c(name,type)), scale.unit=TRUE, quali.sup=29, graph=FALSE)
-var_cah <- plot(acp_cah,choix="var")
-ind_cah <- plot(acp_cah,choix="ind", habillage = 29, col.hab = c("blue","orange","magenta"), autoLab="no")
-
-#### Kmeans
-# partition en 3 groupes 
-pokemon_kmeans <- pokemon_type12
-# kmeans
-K = 3
-cl = kmeans(pokemon.sc,K,nstart=50)
-# creation des classes
-gpe <- cl$cluster
-pokemon_kmeans$groupe <- as.factor(gpe)
-# representation des groupes sur le premier plan factoriel
-acp_kmeans <- PCA(X = select(pokemon_kmeans,-c(name,type)), scale.unit=TRUE, quali.sup=29, graph=FALSE)
-var_kmeans <- plot(acp_kmeans,choix="var")
-ind_kmeans <- plot(acp_kmeans,choix="ind", habillage = 29, autoLab="no")
-
-#### Comparaison
-#comparaison des groupes en fonction des 2 methodes sur les axes factoriels 1 et 2
+```{r, warning=F, message=F, results='hide', out.width="70%", fig.align="center"}
+## comparaison des groupes en fonction des 2 methodes sur les axes factoriels 1 et 2
 plot_grid(ind_cah, var_cah, ind_kmeans, var_kmeans, ncol=2, nrow=2)
 # comme remarque precedemment, les kmeans proposent 3 groupes plus distincts qu'avec la cah
+## comparaison avec 'type_1'
+# tableau de contingence pour la cah
+table_cont_cah <- table(pokemon_cah$groupe,pokemon3$type_1) %>% as.data.frame() %>% as_tibble() %>% rename(Classe_cah = Var1, Type1 = Var2, Freq_cah = Freq)
+table_cont_cah %>% group_by(Classe_cah,Type1) %>% summarise(nb = Freq_cah)
+# tableau de contingence pour Kmeans
+table_cont_kmeans <- table(pokemon_kmeans$groupe,pokemon3$type_1) %>% as.data.frame() %>% as_tibble() %>% rename(Classe_kmeans = Var1, Type1 = Var2, Freq_kmeans = Freq)
+# jointure des tables pour comparer
+table_cont_cah %>% inner_join(table_cont_kmeans) %>% View()
 ```
 
 Pour chaque méthode, nous avons compté, pour chaque classe, le nombre de Pokémon par type, en prenant en compte la variable *type_1*. 
@@ -346,28 +322,86 @@ Nous sommes conscientes que nous perdons en précision en regardant uniquement l
 Mais cela nous donne déjà une idée de la "justesse" des méthodes.  
 
 Ensuite, nous avons regardé les types de Pokémon les plus présents par classe. 
-D'après nos connaissances sur le sujet, les classes issues de la Kmeans nous semblent plus cohérentes que celles issues de la CAH. 
-En effet, le groupe 1 correspond, à priori, aux Pokémon ayant une résistance élevée ou pouvant annuler des attaques. 
-Tandis que le groupe 2 représente les Pokémon ayant des statistiques fortes en attaques spéciales. 
-Enfin, le groupe 3 contient les Pokémon ayant de grosses faiblesses mais des attaques plus fortes.  
+D'après nos connaissances sur le sujet, les classes issues de la K-means nous semblent plus cohérentes que celles issues de la CAH. 
+En effet, le groupe 1 correspond, à priori, aux Pokémon ayant une résistance élevée ou pouvant annuler des attaques alors que le groupe 2 représente les Pokémon ayant des statistiques fortes en attaques spéciales. 
+Enfin, le groupe 3 contient les Pokémon ayant de grosses faiblesses.  
 
 Pour comparer, nous remarquons que les groupes issus de la CAH ne sont pas très cohérents.
-Le groupe 1 n'est pas très ordonné, il semble contenir tout type de créatures.
-Tandis que le groupe 2 est composé, presque, uniquement des Pokémon de types *Fairy* et *Grass*.
-Enfin, le groupe 3 rassemble les types *Ghost* et *Steel* alors qu'ils sont à l'opposé l'un de l'autre.  
+Le groupe 1 n'est pas très ordonné, il semble contenir tout type de créatures tandis que le groupe 2 est composé, presque uniquement des Pokémon de types *Fairy* et *Grass*.
+Enfin, le groupe 3 rassemble les types *Ghost* et *Steel* alors qu'ils ont des types opposés.  
 
-Graphiquement, nous choisissons les groupes issus de la méthode des Kmeans.
+Graphiquement, nous choisissons les groupes issus de la méthode des K-means
 De plus, vis-à-vis de nos connaissances et de la documentation sur les caractéristiques des types (plus de détails [ici](https://www.crumpe.com/2021/10/chaque-type-de-pokemon-classe-du-plus-nul-au-plus-fort/)) nous trouvons que les résultats sont plus cohérents pour cette méthode.  
 
 # 3. Étude des groupes obtenus
+```{r, include=T}
+## on veut regarder pour chaque groupe, les 'types_1' les plus representes
+# on recupere le nombre de pokemon par type_1
+nb_per_type <- pokemon3 %>% group_by(type_1) %>% summarise(nb=n()) %>% pull(nb)
+# on ajoute une colonne avec le nombre de pokemon par type par classe, qu'on ramene au nombre de pokemon par type_1
+percent_type_group <- table_cont_kmeans %>% mutate(
+  nb_type = rep(nb_per_type,3),
+  proportion = (Freq_kmeans/nb_per_type)
+)
+# on regarde les 3 types les plus representes par groupe
+most_freq_group <- percent_type_group %>% group_by(Classe_kmeans) %>% slice_max(proportion,n=3) %>% select(Classe_kmeans, Type1, proportion)
+#knitr::kable(most_freq_group) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+# Groupe 1 : type Rock, Ghost, STeel
+# Groupe 2 : type Psychic, Dragon, Water
+# Groupe 3 : type Grass, Normal, Bug
 
-Caractérisation de la partition obtenue 
-Représentation informative des résultats
-- Graphiques adaptés, représentations factorielles si adaptées
+
+## resume statistique pour chaque groupe
+resume_groupe <- pokemon_kmeans %>% group_by(groupe) %>% summarise(
+  nb_pokemon = n(),
+  poids_moy = mean(weight_kg),
+  taille_moy = mean(height_m),
+  hp_moy = mean(hp),
+  attack_moy = mean(attack),
+  defense_moy = mean(defense),
+  sp_attack_moy = mean(sp_attack),
+  sp_defense_moy = mean(sp_defense),
+  speed_moy = mean(speed),
+  ag_normal_moy = mean(against_normal),
+  ag_fire_moy = mean(against_fire),
+  ag_water_moy = mean(against_water),
+  ag_electric_moy = mean(against_electric),
+  ag_grass_moy = mean(against_grass),
+  ag_ice_moy = mean(against_ice),
+  ag_fight_moy = mean(against_fight),
+  ag_poison_moy = mean(against_poison),
+  ag_ground_moy = mean(against_ground),
+  ag_flying_moy = mean(against_flying),
+  ag_psychic_moy = mean(against_psychic),
+  ag_bug_moy = mean(against_bug),
+  ag_rock_moy = mean(against_rock),
+  ag_ghost_moy = mean(against_ghost),
+  ag_dragon_moy = mean(against_dragon),
+  ag_dark_moy = mean(against_dark),
+  ag_steel_moy = mean(against_steel),
+  ag_fairy_moy = mean(against_fairy)
+)
+
+knitr::kable(resume_groupe %>% t() %>% as.data.frame()) %>% kable_styling(latex_options="HOLD_position", bootstrap_options = c("striped", "hover", "condensed"))
+
+```
+
+
+Suite au choix de la méthode des K-means, nous pouvons étudier les groupes obtenus. Le résumé statistique nous permet d'étudier les caractéristiques de chaque groupe.
+
+- Groupe 1 : Ce groupe contient 168 Pokémon. Ce sont principalement des Pokémon de types Rock, Ghost et Steel. Ces Pokémon sont lourds et ont beaucoup de points de vie (HP). De plus, ce sont des Pokémon avec une attaque et une défense élevées mais ils ne sont pas très rapides pour attaquer. Ils resistent très bien aux types Normal et Poison mais ils sont assez faibles face aux types Water et Flying.
+
+- Groupe 2 : Le deuxième groupe comprend 372 Pokémon de types Psychic, Dragon et Water principalement. Ces Pokémon sont grands et ont beaucoup de points de vie (HP). Leurs attaques classique et spéciale sont élevées et ils sont rapides pour attaquer. Les Pokémon du second groupe sont faibles face au type Ice.
+
+- Groupe 3 : Le troisième et dernier groupe comporte 358 Pokémon. C'est le plus grand groupe. Il est principalement constitué des types Grass, Normal et Bug. Ces Pokémon sont très petits et légers. Ils n'ont pas beaucoup de points de vie (HP). Leurs attaques et leurs défenses sont faibles et ces Pokémon ne sont pas très rapides. Ils sont très faibles face au type Ice et plutôt faible face aux types Flying et Rock.
+
 
 # 4. Conclusions, perspectives et critique
 
-Quels points peuvent être critiqués dans vos choix ?
-Quelles pistes pourraient être explorées pour aller plus loin et/ou mieux explorer ces données ?
-```{r}
-```
+Nous pouvons conclure que les trois groupes obtenus avec les K-means semblent cohérents. En effet, les statistiques par classes rejoignent bien nos intuitions et connaissances sur les Pokémon après s'être documenté.
+
+Cependant, il ne faut pas oublier que nos résultats découlent de nos choix antérieurs. Tout d'abord, nous avons fait le choix de ne pas traiter les variables concernant les groupes d'oeufs, l'espèce, l'habilité, le taux de capture, le lien affectif, l'expérience de base du Pokémon et le pourcentage de mâle.
+
+Le pourcentage de mâle est une variable qui aurait pu être intéréssante afin de voir si certains types de Pokémon sont plutôt féminin, masculin ou asexué. Le problème de cette variable est qu'elle prend la valeur NA lorsque le Pokémon est asexué. Pour pouvoir l'intégrer à notre analyse, il aurait fallu prendre en compte les NA comme une catégorie à part entière. Une possibilité aurait été de transformer la variable en variable qualitative. Cependant en procédant de la sorte, nous perdons de l'information. Pour aller plus loin dans notre analyse, nous aurions pu intégrer la variable *percentage_male* dans notre classification. Nous aurions peut-être eu des resultats différents.
+
+
