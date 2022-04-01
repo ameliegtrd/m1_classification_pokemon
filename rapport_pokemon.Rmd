@@ -289,6 +289,18 @@ Regardons dans la partie suivante si notre choix se confirme avec les kmeans.
 
 ## 2.3. Kmeans
 
+La méthode k-means vise à diviser les points en k groupes, de sorte à ce que la somme des carrés des points au centre du cluster soit minimisée. 
+C'est l'ensemble de points de données qui sont les plus proches du centre de grappes.  
+
+Nous avons commencé par une partition en 3 groupes.
+Pour cela, nous avons fait une représentation des groupes issus des kmeans sur le premier plan factoriel.
+Nous constatons que les 3 classes sont distinctes, peut être même plus qu'avec la CAH.
+Puis, nous avons testé notre modèle pour différentes valeurs de K.  
+
+Ainsi, avec la méthode des kmeans, nous décidons de conserver 3 classes. 
+Notre choix est rassurant puisque le nombre de classes que nous avons gardé est le même avec les deux méthodes.
+Cependant, les groupes sont différents selon la méthode utilisée. 
+Nous allons donc les comparer afin d'en retenir une seule.  
 
 ## 2.4. Choix de la classification
 
