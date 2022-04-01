@@ -1,6 +1,6 @@
 ---
 title: "Pokemon"
-author: "FLOCH ELisa, GOUTARD Amélie et MARMION Violette"
+author: "FLOCH Elisa, GOUTARD Amélie et MARMION Violette"
 date: '2022-04-01'
 output: html_document
 ---
