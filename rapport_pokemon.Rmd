@@ -137,6 +137,7 @@ ggplot(pokemon2) + aes(x=reorder(type_1,type_1, function(x)-length(x)), fill=typ
 Le type *Water* est le plus repésenté puisque quasiment 125 créatures incarnent ce type.
 
 # 2. Classification des individus
+
 ## 2.1. ACP
 
 Avant de commencer la classification, nous allons réaliser une Analyse en Composantes Principales. L’analyse des données nous apporte une première interprétation et intuition. Nous souhaitons voir si les Pokémon se distinguent bien par leurs types.
@@ -226,14 +227,14 @@ Les caractéristiques de la Classification Ascendante Hiérarchique sont :
 - **Hiérarchique** : les classes formées à chaque étape ne sont pas remises en cause  
 Le principe de cette méthode est de partir de la classification la plus fine : chaque individu est dans sa propre classe.  
 
-Pour appliquer cet algorithme, on voit qu’il nous faut :  
+Pour appliquer cet algorithme, nous voyons qu’il nous faut :  
 - Définir une distance ou dissimilarité entre individus  		
 - Définir une distance entre classes : pour le recalcul des distances à l’issue de chaque étape  
 On parle alors de stratégie d'agrégation  
 
-Après avoir standardisé les données, nous pouvons définir la matrice de distances entre individus.
-Nous avons calculer la distance de Ward.
-Cette distance nécessite de disposer des distances euclidiennes (pour que la notion de barycentre comme centre du nuage de points ait un sens), c'est pourquoi nous les avons calculées au préalable.
+Après avoir standardisé les données, nous avons calculé la distance euclidienne.
+Pour effectuer la CAH, nous avons utilisé la distance de Ward.
+Cette distance nécessite de disposer des distances euclidiennes (pour que la notion de barycentre comme centre du nuage de points ait un sens).
 Elle tend à créer des groupes sphériques et de tailles similaires.
 Et elle est sensible à la présence de points outliers.
 C'est le critère le plus utilisé.
@@ -243,8 +244,7 @@ En regardant la  courbe d'inertie des 20 premières valeurs, nous hésitons entr
 Le choix n'étant pas très naturel, nous décidons de tester les 3 cas et ainsi de choisir ce qui nous semble le plus convenable.  
 
 Commençons par faire une partition en 3 groupes.
-Tout d’abord, nous avons créé les classes puis nous les avons représentées sur le dendrogramme suivant :
-
+Pour cela, nous avons fait une représentation des groupes issus de la CAH sur le plan factoriel.
 
 ```{r,  results='hide', include=FALSE}
 ## on standardise les donnees
@@ -280,12 +280,8 @@ rect.hclust(cah.ward, K, border ="blue")
 
 Nous constatons que les classes 2 et 3 sont bien distinctes. 
 La classe 1 est globalement indépendante mais un peu plus mélangée avec les deux autres classes.
-D’après nos connaissances sur le sujet, les groupes ne sont pas mauvais mais nous pensons que nous pouvons faire mieux avec  un nombre de classes plus élevé.  
 
-Ensuite, nous avons fait une représentation des groupes sur les axes factoriels.
-Le graphique des individus confirme notre intuition : les classes 2 et 3 sont distinctes, la classe 1 l'est globalement mais se mélange aussi légèrement avec les autres classes.
-
-Enfin, nous avons tester notre modèle pour différentes valeurs de K.  
+Enfin, nous avons testé notre modèle pour différentes valeurs de K.  
 - Pour 4 groupes : Nous retrouvons 2 classes distinctes (4 et 2)  et 2 classes plus mélangées (1 et 3).  
 - Pour 5 groupes : Nous observons 2 classes distinctes (5 et 3) tandis que les autres classes sont moins évidentes. Si nous comparons les classes 2 et 4 à la classe 1, nous pouvons dire que cette dernière se distingue un peu plus de la classe 5.  
 - Pour 6 groupes : Nous remarquons que les classes 3, 5 et 6 sont distinctes. Elles correspondent bien au graphique des variables (3 groupes de flèches allant dans 3 directions différentes).  
